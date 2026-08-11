@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Al Hikmah Live — Rajarbag Shareef Broadcast</title>
+<meta name="description" content="Listen to the live broadcast from Rajarbag Shareef (Al Hikmah)." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     ============================================================ */
+  :root {
+    --green-deep:   #0B4A36;
+    --green-mid:    #146C4E;
+    --green-glow:   #1E8A65;
+    --gold:         #C9A227;
+    --gold-soft:    #E4C766;
+    --parchment:    #FAF7EF;
+    --parchment-2:  #F1ECDD;
+    --ink:          #1B2420;
+    --ink-soft:     #4B564F;
+    --mist:         #DCE0D8;
+    --live-red:     #C1432D;
+
+    --font-display: 'Amiri', 'Georgia', serif;
+    --font-body: 'Work Sans', -apple-system, sans-serif;
+
+    --radius: 14px;
+    --max-width: 720px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  a { color: var(--green-mid); }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .wrap {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ============================================================
+     SIGNATURE ELEMENT — thin gold 8-point star linework, used as a
+     quiet repeating motif (header rule + card border accent + divider)
+     ============================================================ */
+  .star-rule {
+    height: 22px;
+    width: 100%;
+    background-repeat: repeat-x;
+    background-position: center;
+    background-size: 44px 22px;
+    opacity: 0.55;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='22' viewBox='0 0 44 22'%3E%3Cg fill='none' stroke='%23C9A227' stroke-width='1'%3E%3Cpath d='M22 2 L27 9 L34 9 L28.5 13.5 L31 20 L22 15.5 L13 20 L15.5 13.5 L10 9 L17 9 Z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* ============================================================
+     HEADER
+     ============================================================ */
+  header {
+    background: linear-gradient(180deg, var(--green-deep), var(--green-mid));
+    color: var(--parchment);
+    padding: 40px 0 0;
+    text-align: center;
+  }
+
+  .brand {
+    font-family: var(--font-display);
+    font-size: 2.1rem;
+    letter-spacing: 0.02em;
+    margin: 0 0 6px;
+  }
+
+  .tagline {
+    font-size: 0.95rem;
+    color: var(--gold-soft);
+    margin: 0 0 28px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  header .star-rule { margin-top: 4px; }
+
+  /* ============================================================
+     HERO / LIVE PLAYER CARD
+     ============================================================ */
+  .hero {
+    padding: 36px 0 8px;
+  }
+
+  .player-card {
+    background: #fff;
+    border: 1px solid var(--mist);
+    border-radius: var(--radius);
+    padding: 28px 22px;
+    box-shadow: 0 10px 30px rgba(11, 74, 54, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .player-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--green-deep), var(--gold), var(--green-deep));
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--mist);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .status-dot.live { background: var(--live-red); }
+  .status-dot.live::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1.5px solid var(--live-red);
+    animation: pulse-ring 1.8s ease-out infinite;
+  }
+  .status-dot.checking { background: var(--gold); animation: soft-blink 1.2s ease-in-out infinite; }
+
+  @keyframes pulse-ring {
+    0%   { transform: scale(0.7); opacity: 0.9; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  @keyframes soft-blink {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.35; }
+  }
+
+  .status-label {
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .status-label.live { color: var(--live-red); }
+
+  .source-label {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin: -14px 0 18px;
+    min-height: 1em;
+  }
+
+  .fb-video-wrap {
+    display: none;
+    margin: 4px 0 22px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .fb-video-wrap.open { display: block; }
+
+  /* Play button + waveform-ish center piece */
+  .transport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin: 8px 0 26px;
+  }
+
+  .play-btn {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: none;
+    background: var(--green-deep);
+    color: var(--parchment);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, background 0.2s ease;
+    flex-shrink: 0;
+  }
+  .play-btn:hover { background: var(--green-mid); transform: scale(1.04); }
+  .play-btn:active { transform: scale(0.97); }
+  .play-btn svg { width: 26px; height: 26px; }
+
+  .vol-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 220px;
+  }
+  .mute-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--green-deep);
+    display: flex;
+    padding: 4px;
+  }
+  .mute-btn svg { width: 20px; height: 20px; }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--mist);
+    outline-offset: 4px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    border: 2px solid var(--parchment);
+    box-shadow: 0 0 0 1px var(--gold);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    border: 2px solid var(--parchment);
+  }
+
+  .about-broadcast {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    border-top: 1px dashed var(--mist);
+    padding-top: 18px;
+    margin-top: 4px;
+  }
+
+  /* ============================================================
+     FALLBACK EMBED TOGGLE
+     ============================================================ */
+  .fallback {
+    margin-top: 18px;
+    text-align: center;
+  }
+  .fallback-toggle {
+    background: none;
+    border: 1px solid var(--mist);
+    color: var(--ink-soft);
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    padding: 9px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .fallback-toggle:hover { border-color: var(--green-mid); color: var(--green-deep); }
+
+  .fallback-embed {
+    margin-top: 16px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--mist);
+    display: none;
+  }
+  .fallback-embed.open { display: block; }
+  .fallback-embed iframe {
+    width: 100%;
+    height: 360px;
+    border: none;
+    display: block;
+  }
+
+  /* ============================================================
+     SECTIONS
+     ============================================================ */
+  section.block {
+    padding: 44px 0;
+  }
+  section.block h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--green-deep);
+    margin: 0 0 6px;
+    text-align: center;
+  }
+  section.block .lede {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+
+  /* Notify form */
+  .notify-form {
+    display: flex;
+    gap: 10px;
+    max-width: 420px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .notify-form input[type="email"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 13px 16px;
+    border: 1px solid var(--mist);
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    background: #fff;
+  }
+  .notify-form button {
+    padding: 13px 22px;
+    border: none;
+    border-radius: 10px;
+    background: var(--green-deep);
+    color: var(--parchment);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .notify-form button:hover { background: var(--green-mid); }
+
+  .notify-note {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 12px;
+  }
+
+  .notify-success {
+    display: none;
+    text-align: center;
+    color: var(--green-deep);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-top: 14px;
+  }
+  .notify-success.show { display: block; }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  footer {
+    background: var(--green-deep);
+    color: var(--gold-soft);
+    text-align: center;
+    padding: 28px 20px 34px;
+    font-size: 0.8rem;
+  }
+  footer a { color: var(--parchment); text-decoration: underline; }
+  footer p { margin: 6px 0; }
+
+  @media (max-width: 420px) {
+    .brand { font-size: 1.7rem; }
+    .transport { gap: 12px; }
+    .vol-group { max-width: 150px; }
+  }
+</style>
+</head>
+<body>
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"></script>
+
+<header>
+  <div class="wrap">
+    <h1 class="brand">Al Hikmah Live</h1>
+    <p class="tagline">Rajarbag Shareef — Live Broadcast</p>
+  </div>
+  <div class="star-rule"></div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="player-card">
+
+      <div class="status-row">
+        <span id="statusDot" class="status-dot checking"></span>
+        <span id="statusLabel" class="status-label">Checking status…</span>
+      </div>
+      <p id="sourceLabel" class="source-label"></p>
+
+      <div id="audioTransport" class="transport">
+        <button id="playBtn" class="play-btn" aria-label="Play">
+          <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+
+        <div class="vol-group">
+          <button id="muteBtn" class="mute-btn" aria-label="Mute">
+            <svg id="volIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          </button>
+          <input id="volumeSlider" type="range" min="0" max="100" value="100" aria-label="Volume" />
+        </div>
+      </div>
+
+      <div id="fbVideoWrap" class="fb-video-wrap"></div>
+
+      <p class="about-broadcast">
+        Live audio broadcast from Rajarbag Shareef. Tap play to listen — the stream
+        starts automatically whenever a broadcast is live.
+      </p>
+
+      <div class="fallback">
+        <button id="fallbackToggle" class="fallback-toggle">Player not working? Open the original web player</button>
+        <div id="fallbackEmbed" class="fallback-embed">
+          <iframe src="about:blank" data-src="https://live.al-hikmah.net/" title="Al Hikmah original live player" loading="lazy"></iframe>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="star-rule" style="margin: 8px 0;"></div>
+
+  <section class="block" id="about">
+    <h2>About this broadcast</h2>
+    <p class="lede">
+      This is an unofficial companion site for listening to the live broadcast
+      from Rajarbag Shareef (Al Hikmah). It mirrors the original stream so it's
+      easier to listen from a phone, with a simple play button and a clear
+      live/offline indicator.
+    </p>
+  </section>
+
+  <section class="block" id="notify">
+    <h2>Get notified when it's live</h2>
+    <p class="lede">Leave your email and we'll let you know the moment the broadcast starts.</p>
+
+    <form id="notifyForm" class="notify-form">
+      <input type="email" id="notifyEmail" placeholder="you@example.com" required aria-label="Email address" />
+      <button type="submit">Notify me</button>
+    </form>
+    <p class="notify-note">UI only for now — hook this form up to a real backend when ready.</p>
+    <p id="notifySuccess" class="notify-success">Thanks — you're on the list.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>Unofficial companion site — not affiliated with the broadcaster.</p>
+  <p>Original site: <a href="https://al-hikmah.net" target="_blank" rel="noopener">al-hikmah.net</a></p>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+// Fed by the Netlify Function at /api/live-status, which checks
+// al-hikmah.net, sm40, and Facebook (best-bitrate-wins, Facebook as
+// fallback) server-side. See netlify/functions/live-status.js.
+const STATUS_API_URL = "/api/live-status";
+const POLL_INTERVAL_MS = 60000;
+
+/* ============================================================
+   Elements
+   ============================================================ */
+const statusDot = document.getElementById('statusDot');
+const statusLabel = document.getElementById('statusLabel');
+const sourceLabel = document.getElementById('sourceLabel');
+const audioTransport = document.getElementById('audioTransport');
+const fbVideoWrap = document.getElementById('fbVideoWrap');
+
+const audio = new Audio();
+audio.preload = 'none';
+
+let currentSource = null; // 'alhikmah' | 'sm40' | 'facebook' | null
+
+function setStatus(state) {
+  // state: 'checking' | 'live' | 'offline'
+  statusDot.className = 'status-dot ' + state;
+  statusLabel.className = 'status-label ' + (state === 'live' ? 'live' : '');
+  statusLabel.textContent = state === 'live' ? 'LIVE NOW' : state === 'offline' ? 'Offline' : 'Checking status…';
+}
+
+function showAudioSource(url, sourceName, bitrateKbps) {
+  currentSource = sourceName;
+  audioTransport.style.display = 'flex';
+  fbVideoWrap.classList.remove('open');
+  fbVideoWrap.innerHTML = '';
+
+  if (audio.src !== url) {
+    const wasPlaying = isPlaying;
+    audio.src = url;
+    if (wasPlaying) audio.play().catch(() => {});
+  }
+
+  const label = sourceName === 'alhikmah' ? 'al-hikmah.net' : 'sm40';
+  sourceLabel.textContent = bitrateKbps
+    ? `Connected: ${label} · ${bitrateKbps} kbps`
+    : `Connected: ${label}`;
+}
+
+function showFacebookSource(permalinkUrl) {
+  currentSource = 'facebook';
+  audio.pause();
+  audioTransport.style.display = 'none';
+  sourceLabel.textContent = 'Connected: Facebook Live';
+
+  fbVideoWrap.innerHTML =
+    `<div class="fb-video" data-href="${permalinkUrl}" data-autoplay="true" data-width="auto" data-show-text="false" data-allowfullscreen="true"></div>`;
+  fbVideoWrap.classList.add('open');
+
+  if (window.FB && window.FB.XFBML) {
+    window.FB.XFBML.parse(fbVideoWrap);
+  }
+}
+
+function showNothingLive() {
+  currentSource = null;
+  audio.pause();
+  audioTransport.style.display = 'flex';
+  fbVideoWrap.classList.remove('open');
+  fbVideoWrap.innerHTML = '';
+  sourceLabel.textContent = '';
+}
+
+async function checkLiveStatus() {
+  setStatus('checking');
+  try {
+    const res = await fetch(STATUS_API_URL, { cache: 'no-store' });
+    const data = await res.json();
+
+    if (!data.live) {
+      setStatus('offline');
+      showNothingLive();
+      return;
+    }
+
+    setStatus('live');
+    if (data.type === 'audio') {
+      showAudioSource(data.streamUrl, data.source, data.bitrateKbps);
+    } else if (data.type === 'video' && data.embedUrl) {
+      showFacebookSource(data.embedUrl);
+    }
+  } catch (e) {
+    setStatus('offline');
+    showNothingLive();
+  }
+}
+
+checkLiveStatus();
+setInterval(checkLiveStatus, POLL_INTERVAL_MS);
+
+/* ============================================================
+   Audio player controls
+   ============================================================ */
+const playBtn = document.getElementById('playBtn');
+const playIcon = document.getElementById('playIcon');
+const muteBtn = document.getElementById('muteBtn');
+const volIcon = document.getElementById('volIcon');
+const volumeSlider = document.getElementById('volumeSlider');
+
+const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+const ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+const ICON_VOL = '<path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+const ICON_MUTE = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.42.05-.63zM19 12c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+
+let isPlaying = false;
+let isMuted = false;
+
+playBtn.addEventListener('click', () => {
+  if (isPlaying) {
+    audio.pause();
+  } else {
+    audio.play().catch(() => {
+      // Autoplay/stream errors land here — surface a gentle status change.
+      setStatus('offline');
+    });
+  }
+});
+
+audio.addEventListener('play', () => {
+  isPlaying = true;
+  playIcon.innerHTML = ICON_PAUSE;
+  playBtn.setAttribute('aria-label', 'Pause');
+});
+audio.addEventListener('pause', () => {
+  isPlaying = false;
+  playIcon.innerHTML = ICON_PLAY;
+  playBtn.setAttribute('aria-label', 'Play');
+});
+
+muteBtn.addEventListener('click', () => {
+  isMuted = !isMuted;
+  audio.muted = isMuted;
+  volIcon.innerHTML = isMuted ? ICON_MUTE : ICON_VOL;
+  muteBtn.setAttribute('aria-label', isMuted ? 'Unmute' : 'Mute');
+});
+
+volumeSlider.addEventListener('input', (e) => {
+  const v = Number(e.target.value) / 100;
+  audio.volume = v;
+  if (v === 0 && !isMuted) {
+    isMuted = true;
+    audio.muted = true;
+    volIcon.innerHTML = ICON_MUTE;
+  } else if (v > 0 && isMuted) {
+    isMuted = false;
+    audio.muted = false;
+    volIcon.innerHTML = ICON_VOL;
+  }
+});
+
+/* ============================================================
+   Fallback embed toggle (lazy-loads the iframe only when opened)
+   ============================================================ */
+const fallbackToggle = document.getElementById('fallbackToggle');
+const fallbackEmbed = document.getElementById('fallbackEmbed');
+let fallbackLoaded = false;
+
+fallbackToggle.addEventListener('click', () => {
+  fallbackEmbed.classList.toggle('open');
+  if (fallbackEmbed.classList.contains('open') && !fallbackLoaded) {
+    const iframe = fallbackEmbed.querySelector('iframe');
+    iframe.src = iframe.dataset.src;
+    fallbackLoaded = true;
+  }
+});
+
+/* ============================================================
+   Notify form (UI only — wire to a real backend later)
+   ============================================================ */
+const notifyForm = document.getElementById('notifyForm');
+const notifySuccess = document.getElementById('notifySuccess');
+
+notifyForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  notifySuccess.classList.add('show');
+  notifyForm.reset();
+});
+</script>
+
+</body>
+</html>
