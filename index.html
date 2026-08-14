@@ -181,6 +181,43 @@
     min-height: 1em;
   }
 
+  /* ============================================================
+     MANUAL SOURCE SELECTOR
+     ============================================================ */
+  .source-picker {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0 0 20px;
+  }
+  .source-tab {
+    border: 1px solid var(--mist);
+    background: var(--parchment-2);
+    color: var(--ink-soft);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 7px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .source-tab:hover { border-color: var(--green-glow); }
+  .source-tab.active {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--parchment);
+  }
+  .source-note {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin: -12px 0 18px;
+    min-height: 1em;
+  }
+
   .fb-video-wrap {
     display: none;
     margin: 4px 0 22px;
@@ -417,6 +454,14 @@
       </div>
       <p id="sourceLabel" class="source-label"></p>
 
+      <div class="source-picker" id="sourcePicker" role="group" aria-label="Choose broadcast source">
+        <button type="button" class="source-tab active" data-mode="auto">Auto</button>
+        <button type="button" class="source-tab" data-mode="alhikmah">al-hikmah.net</button>
+        <button type="button" class="source-tab" data-mode="sm40">sm40</button>
+        <button type="button" class="source-tab" data-mode="facebook">Facebook</button>
+      </div>
+      <p id="sourceNote" class="source-note"></p>
+
       <div id="audioTransport" class="transport">
         <button id="playBtn" class="play-btn" aria-label="Play">
           <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -494,13 +539,17 @@ const POLL_INTERVAL_MS = 60000;
 const statusDot = document.getElementById('statusDot');
 const statusLabel = document.getElementById('statusLabel');
 const sourceLabel = document.getElementById('sourceLabel');
+const sourceNote = document.getElementById('sourceNote');
 const audioTransport = document.getElementById('audioTransport');
 const fbVideoWrap = document.getElementById('fbVideoWrap');
+const sourcePicker = document.getElementById('sourcePicker');
 
 const audio = new Audio();
 audio.preload = 'none';
 
 let currentSource = null; // 'alhikmah' | 'sm40' | 'facebook' | null
+let mode = 'auto'; // 'auto' | 'alhikmah' | 'sm40' | 'facebook'  — user's manual choice
+let lastData = null; // most recent /api/live-status response, reused when switching modes
 
 function setStatus(state) {
   // state: 'checking' | 'live' | 'offline'
@@ -509,7 +558,7 @@ function setStatus(state) {
   statusLabel.textContent = state === 'live' ? 'LIVE NOW' : state === 'offline' ? 'Offline' : 'Checking status…';
 }
 
-function showAudioSource(url, sourceName, bitrateKbps) {
+function showAudioSource(url, sourceName, bitrateKbps, manual) {
   currentSource = sourceName;
   audioTransport.style.display = 'flex';
   fbVideoWrap.classList.remove('open');
@@ -518,7 +567,7 @@ function showAudioSource(url, sourceName, bitrateKbps) {
   if (audio.src !== url) {
     const wasPlaying = isPlaying;
     audio.src = url;
-    if (wasPlaying) audio.play().catch(() => {});
+    if (wasPlaying || manual) audio.play().catch(() => {});
   }
 
   const label = sourceName === 'alhikmah' ? 'al-hikmah.net' : 'sm40';
@@ -542,6 +591,20 @@ function showFacebookSource(permalinkUrl) {
   }
 }
 
+function showFacebookPageLink(pageUrl) {
+  currentSource = 'facebook';
+  audio.pause();
+  audioTransport.style.display = 'none';
+  sourceLabel.textContent = 'Facebook is not live right now';
+  fbVideoWrap.classList.remove('open');
+  fbVideoWrap.innerHTML = '';
+  if (pageUrl) {
+    sourceNote.innerHTML = `You can still visit the <a href="${pageUrl}" target="_blank" rel="noopener">Facebook page</a> directly.`;
+  } else {
+    sourceNote.textContent = 'Facebook checking isn\u2019t set up on this site yet.';
+  }
+}
+
 function showNothingLive() {
   currentSource = null;
   audio.pause();
@@ -551,28 +614,69 @@ function showNothingLive() {
   sourceLabel.textContent = '';
 }
 
-async function checkLiveStatus() {
-  setStatus('checking');
-  try {
-    const res = await fetch(STATUS_API_URL, { cache: 'no-store' });
-    const data = await res.json();
+// Render whatever `mode` currently says, using the most recent API data.
+function render() {
+  sourceNote.textContent = '';
+  const data = lastData;
 
-    if (!data.live) {
-      setStatus('offline');
+  if (mode === 'auto') {
+    if (!data || !data.live) {
+      setStatus(data ? 'offline' : 'checking');
       showNothingLive();
       return;
     }
-
     setStatus('live');
     if (data.type === 'audio') {
-      showAudioSource(data.streamUrl, data.source, data.bitrateKbps);
+      showAudioSource(data.streamUrl, data.source, data.bitrateKbps, false);
     } else if (data.type === 'video' && data.embedUrl) {
       showFacebookSource(data.embedUrl);
     }
-  } catch (e) {
-    setStatus('offline');
-    showNothingLive();
+    return;
   }
+
+  if (mode === 'alhikmah' || mode === 'sm40') {
+    const url = data && data.sourceUrls ? data.sourceUrls[mode] : null;
+    if (!url) { setStatus('checking'); return; }
+    // Reflect real status if we happen to know it, but connect regardless —
+    // this is a manual override so the person can always try listening.
+    const known = data && data.allSourcesChecked ? data.allSourcesChecked[mode] : null;
+    setStatus(known && known.live ? 'live' : 'checking');
+    showAudioSource(url, mode, known ? known.bitrateKbps : null, true);
+    if (known && !known.live) {
+      sourceNote.textContent = 'This source doesn\u2019t look live right now, but you can still try listening.';
+    }
+    return;
+  }
+
+  if (mode === 'facebook') {
+    if (data && data.type === 'video' && data.embedUrl) {
+      setStatus('live');
+      showFacebookSource(data.embedUrl);
+    } else {
+      setStatus('offline');
+      showFacebookPageLink(data ? data.facebookPageUrl : null);
+    }
+    return;
+  }
+}
+
+sourcePicker.addEventListener('click', (e) => {
+  const btn = e.target.closest('.source-tab');
+  if (!btn) return;
+  mode = btn.dataset.mode;
+  [...sourcePicker.children].forEach(c => c.classList.toggle('active', c === btn));
+  render();
+});
+
+async function checkLiveStatus() {
+  if (mode === 'auto') setStatus('checking');
+  try {
+    const res = await fetch(STATUS_API_URL, { cache: 'no-store' });
+    lastData = await res.json();
+  } catch (e) {
+    lastData = null;
+  }
+  render();
 }
 
 checkLiveStatus();
