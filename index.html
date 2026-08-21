@@ -8,6 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://live.al-hikmah.net">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -223,8 +224,16 @@
     margin: 4px 0 22px;
     border-radius: 10px;
     overflow: hidden;
+    border: 1px solid var(--mist);
+    background: var(--parchment-2);
   }
   .fb-video-wrap.open { display: block; }
+  .fb-video-wrap iframe {
+    display: block;
+    width: 100%;
+    height: 500px;
+    border: none;
+  }
 
   /* Play button + waveform-ish center piece */
   .transport {
@@ -269,6 +278,66 @@
     padding: 4px;
   }
   .mute-btn svg { width: 20px; height: 20px; }
+
+  .boost-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: -12px 0 10px;
+  }
+  .boost-toggle {
+    border: 1px solid var(--mist);
+    background: var(--parchment-2);
+    color: var(--ink-soft);
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 5px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .boost-toggle:hover { border-color: var(--green-glow); }
+  .boost-toggle.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+  .vol-pct {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    min-width: 32px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .connecting-note {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--gold);
+    font-weight: 600;
+    margin: -14px 0 14px;
+    min-height: 1em;
+  }
+
+  .volume-warning {
+    display: none;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--live-red);
+    background: #FBEAE6;
+    border: 1px solid #EBC5BC;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 0 0 16px;
+    line-height: 1.4;
+  }
+  .volume-warning.show { display: block; }
 
   input[type="range"] {
     -webkit-appearance: none;
@@ -432,8 +501,8 @@
 </style>
 </head>
 <body>
-<div id="fb-root"></div>
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"></script>
+<!-- Facebook is embedded via the public Page Plugin iframe (see script below) —
+     no Facebook SDK / App ID / login needed for that. -->
 
 <header>
   <div class="wrap">
@@ -457,10 +526,10 @@
       <div class="source-picker" id="sourcePicker" role="group" aria-label="Choose broadcast source">
         <button type="button" class="source-tab active" data-mode="auto">Auto</button>
         <button type="button" class="source-tab" data-mode="alhikmah">al-hikmah.net</button>
-        <button type="button" class="source-tab" data-mode="sm40">sm40</button>
         <button type="button" class="source-tab" data-mode="facebook">Facebook</button>
       </div>
       <p id="sourceNote" class="source-note"></p>
+      <p id="connectingNote" class="connecting-note"></p>
 
       <div id="audioTransport" class="transport">
         <button id="playBtn" class="play-btn" aria-label="Play">
@@ -472,8 +541,18 @@
             <svg id="volIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
           </button>
           <input id="volumeSlider" type="range" min="0" max="100" value="100" aria-label="Volume" />
+          <span id="volPct" class="vol-pct">100%</span>
         </div>
       </div>
+
+      <div class="boost-row">
+        <button type="button" id="boostToggle" class="boost-toggle" aria-pressed="false">
+          🔊 Unlimited volume boost
+        </button>
+      </div>
+      <p id="volumeWarning" class="volume-warning">
+        ⚠️ High boost can distort the sound and may damage your speaker or headphones over time. Increase carefully and stop if it sounds harsh.
+      </p>
 
       <div id="fbVideoWrap" class="fb-video-wrap"></div>
 
@@ -528,8 +607,9 @@
    CONFIG
    ============================================================ */
 // Fed by the Netlify Function at /api/live-status, which checks
-// al-hikmah.net, sm40, and Facebook (best-bitrate-wins, Facebook as
-// fallback) server-side. See netlify/functions/live-status.js.
+// al-hikmah.net's stream server-side. Facebook can't be auto-checked
+// (needs a page-admin token) so it's shown as a public embed instead.
+// See netlify/functions/live-status.js.
 const STATUS_API_URL = "/api/live-status";
 const POLL_INTERVAL_MS = 60000;
 
@@ -543,12 +623,23 @@ const sourceNote = document.getElementById('sourceNote');
 const audioTransport = document.getElementById('audioTransport');
 const fbVideoWrap = document.getElementById('fbVideoWrap');
 const sourcePicker = document.getElementById('sourcePicker');
+const connectingNote = document.getElementById('connectingNote');
 
 const audio = new Audio();
 audio.preload = 'none';
 
-let currentSource = null; // 'alhikmah' | 'sm40' | 'facebook' | null
-let mode = 'auto'; // 'auto' | 'alhikmah' | 'sm40' | 'facebook'  — user's manual choice
+audio.addEventListener('waiting', () => {
+  connectingNote.textContent = 'Connecting… this can take a few seconds depending on the source.';
+});
+audio.addEventListener('playing', () => {
+  connectingNote.textContent = '';
+});
+audio.addEventListener('pause', () => {
+  connectingNote.textContent = '';
+});
+
+let currentSource = null; // 'alhikmah' | null
+let mode = 'auto'; // 'auto' | 'alhikmah' | 'facebook'  — user's manual choice
 let lastData = null; // most recent /api/live-status response, reused when switching modes
 
 function setStatus(state) {
@@ -558,11 +649,10 @@ function setStatus(state) {
   statusLabel.textContent = state === 'live' ? 'LIVE NOW' : state === 'offline' ? 'Offline' : 'Checking status…';
 }
 
-function showAudioSource(url, sourceName, bitrateKbps, manual) {
-  currentSource = sourceName;
+function showAudioSource(url, bitrateKbps, manual) {
+  currentSource = 'alhikmah';
   audioTransport.style.display = 'flex';
   fbVideoWrap.classList.remove('open');
-  fbVideoWrap.innerHTML = '';
 
   if (audio.src !== url) {
     const wasPlaying = isPlaying;
@@ -570,39 +660,9 @@ function showAudioSource(url, sourceName, bitrateKbps, manual) {
     if (wasPlaying || manual) audio.play().catch(() => {});
   }
 
-  const label = sourceName === 'alhikmah' ? 'al-hikmah.net' : 'sm40';
   sourceLabel.textContent = bitrateKbps
-    ? `Connected: ${label} · ${bitrateKbps} kbps`
-    : `Connected: ${label}`;
-}
-
-function showFacebookSource(permalinkUrl) {
-  currentSource = 'facebook';
-  audio.pause();
-  audioTransport.style.display = 'none';
-  sourceLabel.textContent = 'Connected: Facebook Live';
-
-  fbVideoWrap.innerHTML =
-    `<div class="fb-video" data-href="${permalinkUrl}" data-autoplay="true" data-width="auto" data-show-text="false" data-allowfullscreen="true"></div>`;
-  fbVideoWrap.classList.add('open');
-
-  if (window.FB && window.FB.XFBML) {
-    window.FB.XFBML.parse(fbVideoWrap);
-  }
-}
-
-function showFacebookPageLink(pageUrl) {
-  currentSource = 'facebook';
-  audio.pause();
-  audioTransport.style.display = 'none';
-  sourceLabel.textContent = 'Facebook is not live right now';
-  fbVideoWrap.classList.remove('open');
-  fbVideoWrap.innerHTML = '';
-  if (pageUrl) {
-    sourceNote.innerHTML = `You can still visit the <a href="${pageUrl}" target="_blank" rel="noopener">Facebook page</a> directly.`;
-  } else {
-    sourceNote.textContent = 'Facebook checking isn\u2019t set up on this site yet.';
-  }
+    ? `Connected: al-hikmah.net · ${bitrateKbps} kbps`
+    : `Connected: al-hikmah.net`;
 }
 
 function showNothingLive() {
@@ -612,6 +672,41 @@ function showNothingLive() {
   fbVideoWrap.classList.remove('open');
   fbVideoWrap.innerHTML = '';
   sourceLabel.textContent = '';
+}
+
+// Facebook can't be auto-checked for a "live right now" flag (that needs a
+// Page Access Token only a page admin can generate). Instead we embed
+// Facebook's own public "Page Plugin" as an iframe — no login, App ID, or
+// token required. It shows the page's timeline, and if the page is
+// actually broadcasting live, the live video appears playable right at
+// the top, right inside our site.
+function showFacebookEmbed(pageUrl) {
+  currentSource = 'facebook';
+  audio.pause();
+  audioTransport.style.display = 'none';
+
+  if (!pageUrl) {
+    sourceLabel.textContent = '';
+    sourceNote.textContent = 'Facebook page link isn\u2019t set up on this site yet.';
+    fbVideoWrap.classList.remove('open');
+    fbVideoWrap.innerHTML = '';
+    return;
+  }
+
+  sourceLabel.textContent = 'Facebook Page';
+  sourceNote.textContent = 'If a Waz/Sama is currently live on Facebook, it will appear playable below.';
+
+  const embedSrc =
+    'https://www.facebook.com/plugins/page.php?href=' + encodeURIComponent(pageUrl) +
+    '&tabs=timeline&width=500&height=500&small_header=false' +
+    '&adapt_container_width=true&hide_cover=false&show_facepile=false';
+
+  if (fbVideoWrap.dataset.src !== embedSrc) {
+    fbVideoWrap.innerHTML =
+      `<iframe src="${embedSrc}" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`;
+    fbVideoWrap.dataset.src = embedSrc;
+  }
+  fbVideoWrap.classList.add('open');
 }
 
 // Render whatever `mode` currently says, using the most recent API data.
@@ -626,22 +721,18 @@ function render() {
       return;
     }
     setStatus('live');
-    if (data.type === 'audio') {
-      showAudioSource(data.streamUrl, data.source, data.bitrateKbps, false);
-    } else if (data.type === 'video' && data.embedUrl) {
-      showFacebookSource(data.embedUrl);
-    }
+    showAudioSource(data.streamUrl, data.bitrateKbps, false);
     return;
   }
 
-  if (mode === 'alhikmah' || mode === 'sm40') {
-    const url = data && data.sourceUrls ? data.sourceUrls[mode] : null;
+  if (mode === 'alhikmah') {
+    const url = data && data.sourceUrls ? data.sourceUrls.alhikmah : null;
     if (!url) { setStatus('checking'); return; }
     // Reflect real status if we happen to know it, but connect regardless —
     // this is a manual override so the person can always try listening.
-    const known = data && data.allSourcesChecked ? data.allSourcesChecked[mode] : null;
+    const known = data && data.allSourcesChecked ? data.allSourcesChecked.alhikmah : null;
     setStatus(known && known.live ? 'live' : 'checking');
-    showAudioSource(url, mode, known ? known.bitrateKbps : null, true);
+    showAudioSource(url, known ? known.bitrateKbps : null, true);
     if (known && !known.live) {
       sourceNote.textContent = 'This source doesn\u2019t look live right now, but you can still try listening.';
     }
@@ -649,13 +740,8 @@ function render() {
   }
 
   if (mode === 'facebook') {
-    if (data && data.type === 'video' && data.embedUrl) {
-      setStatus('live');
-      showFacebookSource(data.embedUrl);
-    } else {
-      setStatus('offline');
-      showFacebookPageLink(data ? data.facebookPageUrl : null);
-    }
+    setStatus('checking'); // we genuinely don't know — check the embed below
+    showFacebookEmbed(data ? data.facebookPageUrl : null);
     return;
   }
 }
@@ -690,6 +776,9 @@ const playIcon = document.getElementById('playIcon');
 const muteBtn = document.getElementById('muteBtn');
 const volIcon = document.getElementById('volIcon');
 const volumeSlider = document.getElementById('volumeSlider');
+const volPct = document.getElementById('volPct');
+const boostToggle = document.getElementById('boostToggle');
+const volumeWarning = document.getElementById('volumeWarning');
 
 const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
 const ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
@@ -699,10 +788,81 @@ const ICON_MUTE = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.0
 let isPlaying = false;
 let isMuted = false;
 
+// ---- Unlimited volume boost (Web Audio API) ----
+// A plain <audio> element caps volume at 100% (native browser limit).
+// To go louder we route the audio through a GainNode instead, which can
+// amplify past unity gain. This is opt-in (off by default) because it
+// depends on the stream server allowing cross-origin audio processing —
+// if it doesn't, boosting could silence the audio, so turning the toggle
+// back off always restores normal playback via the plain <audio> volume.
+const BOOST_MAX_PERCENT = 400; // slider goes up to 400% when boost is on
+const BOOST_WARN_PERCENT = 150; // show the hearing-safety warning past this
+
+let boostOn = false;
+let audioCtx = null;
+let gainNode = null;
+let sourceNode = null;
+
+function ensureBoostGraph() {
+  if (audioCtx) return true;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new Ctx();
+    sourceNode = audioCtx.createMediaElementSource(audio);
+    gainNode = audioCtx.createGain();
+    sourceNode.connect(gainNode).connect(audioCtx.destination);
+    return true;
+  } catch (e) {
+    audioCtx = null;
+    return false;
+  }
+}
+
+function currentVolumePercent() {
+  return Number(volumeSlider.value);
+}
+
+function applyVolume() {
+  const pct = currentVolumePercent();
+  volPct.textContent = pct + '%';
+  volumeWarning.classList.toggle('show', boostOn && pct > BOOST_WARN_PERCENT);
+
+  if (boostOn && gainNode) {
+    audio.volume = 1; // let the GainNode do all the scaling
+    gainNode.gain.value = pct / 100;
+  } else {
+    if (gainNode) gainNode.gain.value = 1;
+    audio.volume = Math.min(pct, 100) / 100;
+  }
+}
+
+boostToggle.addEventListener('click', () => {
+  if (!boostOn) {
+    const ok = ensureBoostGraph();
+    if (!ok) {
+      volumeWarning.textContent = 'Volume boost isn\u2019t supported in this browser.';
+      volumeWarning.classList.add('show');
+      return;
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    boostOn = true;
+    volumeSlider.max = String(BOOST_MAX_PERCENT);
+    volumeWarning.textContent = '⚠️ High boost can distort the sound and may damage your speaker or headphones over time. Increase carefully and stop if it sounds harsh.';
+  } else {
+    boostOn = false;
+    volumeSlider.max = '100';
+    if (currentVolumePercent() > 100) volumeSlider.value = '100';
+  }
+  boostToggle.classList.toggle('active', boostOn);
+  boostToggle.setAttribute('aria-pressed', String(boostOn));
+  applyVolume();
+});
+
 playBtn.addEventListener('click', () => {
   if (isPlaying) {
     audio.pause();
   } else {
+    if (boostOn && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     audio.play().catch(() => {
       // Autoplay/stream errors land here — surface a gentle status change.
       setStatus('offline');
@@ -729,17 +889,17 @@ muteBtn.addEventListener('click', () => {
 });
 
 volumeSlider.addEventListener('input', (e) => {
-  const v = Number(e.target.value) / 100;
-  audio.volume = v;
-  if (v === 0 && !isMuted) {
+  const pct = Number(e.target.value);
+  if (pct === 0 && !isMuted) {
     isMuted = true;
     audio.muted = true;
     volIcon.innerHTML = ICON_MUTE;
-  } else if (v > 0 && isMuted) {
+  } else if (pct > 0 && isMuted) {
     isMuted = false;
     audio.muted = false;
     volIcon.innerHTML = ICON_VOL;
   }
+  applyVolume();
 });
 
 /* ============================================================
