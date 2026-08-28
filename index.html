@@ -9,36 +9,40 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://live.al-hikmah.net">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Serif+Bengali:wght@500;700&family=Hind+Siliguri:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Serif+Bengali:wght@500;700&family=Hind+Siliguri:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
 
 <style>
   /* ============================================================
-     DESIGN TOKENS — "night broadcast": deep indigo dark theme,
-     brass/lantern accent, echoing the official logo's radiating
-     broadcast-wave arcs as the page's signature motif.
+     DESIGN TOKENS — "Internet Voice": the brief's own name for the
+     broadcast is literally "voice radio". So the page is built as a
+     vintage wireless-set: walnut cabinet, brass trim, a tuning dial
+     with a VU needle, an ON-AIR lamp, and preset buttons — instead
+     of a generic flat website chrome.
      ============================================================ */
   :root {
-    --night:        #0D1226;
-    --night-2:      #161C38;
-    --night-3:      #1F2748;
-    --brass:        #C08B3E;
-    --brass-soft:   #E3B872;
-    --brass-dim:    #8A6A3A;
-    --linen:        #F3EEE4;
-    --ink:          #ECE8DC;
-    --muted:        #8B92B4;
-    --muted-2:      #5C6288;
-    --live:         #E2574C;
-    --hairline:     rgba(227, 184, 114, 0.16);
+    --wood-dark:   #201209;
+    --wood:        #3B2415;
+    --wood-light:  #5C3A22;
+    --wood-grain:  #2C1810;
+    --brass:       #B8863B;
+    --brass-bright:#E4B96A;
+    --brass-dark:  #7A5726;
+    --dial-cream:  #F1E7C9;
+    --dial-ink:    #241505;
+    --lamp:        #E2432F;
+    --lamp-glow:   #FF7A3D;
+    --cream-text:  #EFE2C4;
+    --cream-dim:   #B8A785;
+    --hairline:    rgba(228, 185, 106, 0.22);
 
+    --font-label:   'Special Elite', 'Courier New', monospace;
     --font-arabic:  'Amiri', 'Traditional Arabic', serif;
     --font-bangla-display: 'Noto Serif Bengali', 'Amiri', serif;
-    --font-bangla-body: 'Hind Siliguri', 'Work Sans', sans-serif;
+    --font-bangla-body: 'Hind Siliguri', sans-serif;
     --font-en:      'Amiri', serif;
-    --font-ui:      'Hind Siliguri', 'Work Sans', -apple-system, sans-serif;
 
-    --radius: 16px;
-    --max-width: 640px;
+    --radius: 18px;
+    --max-width: 620px;
   }
 
   * { box-sizing: border-box; }
@@ -46,9 +50,10 @@
 
   body {
     margin: 0;
-    background: var(--night);
-    color: var(--ink);
-    font-family: var(--font-ui);
+    background:
+      radial-gradient(ellipse 140% 90% at 50% -10%, var(--wood-light) 0%, var(--wood) 45%, var(--wood-dark) 100%);
+    color: var(--cream-text);
+    font-family: var(--font-bangla-body);
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
   }
@@ -57,396 +62,432 @@
     * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 
-  a { color: var(--brass-soft); }
+  a { color: var(--brass-bright); }
   a:focus-visible, button:focus-visible, input:focus-visible {
-    outline: 2px solid var(--brass-soft);
+    outline: 2px solid var(--brass-bright);
     outline-offset: 2px;
   }
 
-  .wrap { max-width: var(--max-width); margin: 0 auto; padding: 0 20px; }
+  .wrap { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
 
   /* ============================================================
-     HERO — radiating broadcast-wave arcs (echoes the logo) behind
-     the honorific block. Signature element of the page.
+     CABINET — the radio set itself
      ============================================================ */
-  .hero {
+  .cabinet-wrap { padding: 28px 0 6px; }
+
+  .cabinet {
     position: relative;
-    overflow: hidden;
-    padding: 46px 0 38px;
-    text-align: center;
     background:
-      radial-gradient(ellipse 120% 70% at 50% 0%, #1A2450 0%, var(--night) 72%);
+      repeating-linear-gradient(100deg, var(--wood) 0 3px, var(--wood-grain) 3px 4px),
+      linear-gradient(160deg, var(--wood-light), var(--wood) 55%, var(--wood-dark));
+    border-radius: var(--radius);
+    padding: 22px 20px 26px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.06) inset,
+      0 18px 40px rgba(0,0,0,0.45);
+    border: 1px solid rgba(0,0,0,0.5);
   }
 
-  .wave-arcs {
+  /* decorative brass corner screws — used only here, once, with restraint */
+  .screw {
     position: absolute;
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 640px;
-    height: 640px;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .wave-arcs span {
-    position: absolute;
-    top: 50%; left: 50%;
-    border: 1.5px solid var(--brass);
+    width: 9px; height: 9px;
     border-radius: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    animation: arc-breathe 5s ease-in-out infinite;
+    background: radial-gradient(circle at 35% 30%, var(--brass-bright), var(--brass-dark) 75%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.6);
   }
-  .wave-arcs span:nth-child(1) { width: 220px; height: 220px; opacity: 0.28; animation-delay: 0s; }
-  .wave-arcs span:nth-child(2) { width: 360px; height: 360px; opacity: 0.18; animation-delay: 0.6s; }
-  .wave-arcs span:nth-child(3) { width: 500px; height: 500px; opacity: 0.11; animation-delay: 1.2s; }
-  .wave-arcs span:nth-child(4) { width: 640px; height: 640px; opacity: 0.06; animation-delay: 1.8s; }
-  @keyframes arc-breathe {
-    0%, 100% { transform: translate(-50%, -50%) scale(0.97); }
-    50% { transform: translate(-50%, -50%) scale(1.02); }
+  .screw::after {
+    content: "";
+    position: absolute; top: 50%; left: 12%;
+    width: 76%; height: 1px;
+    background: rgba(0,0,0,0.5);
+    transform: translateY(-50%) rotate(35deg);
+  }
+  .screw.tl { top: 12px; left: 12px; }
+  .screw.tr { top: 12px; right: 12px; }
+  .screw.bl { bottom: 12px; left: 12px; }
+  .screw.br { bottom: 12px; right: 12px; }
+
+  /* ---- Nameplate: brass-framed engraved plate with logo medallion ---- */
+  .nameplate {
+    background: linear-gradient(180deg, #1B0F07, #120A05);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 26px 16px 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5) inset;
   }
 
-  .hero-inner { position: relative; z-index: 1; }
-
-  .logo-mark {
-    width: 78px;
-    height: auto;
-    margin: 0 auto 22px;
-    display: block;
-    filter: drop-shadow(0 0 22px rgba(224,184,114,0.25));
+  .medallion {
+    width: 66px; height: 66px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, var(--brass-bright), var(--brass-dark) 78%);
+    padding: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.4);
   }
-
-  .honorific { max-width: 600px; margin: 0 auto; padding: 0 18px; }
+  .medallion-inner {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: var(--dial-cream);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .medallion-inner img { width: 74%; height: auto; }
 
   .honorific .arabic {
     direction: rtl;
     font-family: var(--font-arabic);
-    font-size: 1.3rem;
-    line-height: 2.2;
-    color: var(--brass-soft);
-    margin: 0 0 20px;
+    font-size: 1.22rem;
+    line-height: 2.15;
+    color: var(--brass-bright);
+    margin: 0 0 18px;
   }
   .honorific .arabic .name-line {
     display: block;
-    font-size: 1.46rem;
-    margin: 12px 0;
-    color: var(--linen);
+    font-size: 1.36rem;
+    margin: 11px 0;
+    color: var(--cream-text);
   }
 
   .honorific .bangla {
     font-family: var(--font-bangla-display);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 500;
     line-height: 2;
-    color: #D9D3C2;
-    margin: 0 0 18px;
+    color: var(--cream-dim);
+    margin: 0 0 16px;
   }
   .honorific .bangla .name-line {
     display: block;
-    font-size: 1.1rem;
+    font-size: 1.02rem;
     font-weight: 700;
-    margin: 10px 0;
-    color: var(--linen);
+    margin: 9px 0;
+    color: var(--cream-text);
   }
 
   .honorific .english {
     font-family: var(--font-en);
     font-style: italic;
-    font-size: 0.8rem;
-    line-height: 1.9;
-    color: var(--muted);
-    margin: 0 0 20px;
+    font-size: 0.76rem;
+    line-height: 1.85;
+    color: var(--cream-dim);
+    opacity: 0.85;
+    margin: 0 0 18px;
   }
   .honorific .english .name-line {
     display: block;
     font-weight: 700;
     font-style: normal;
     margin: 6px 0;
-    color: var(--brass-soft);
+    color: var(--brass-bright);
   }
 
   .honorific .tagline {
-    font-family: var(--font-bangla-body);
-    font-size: 0.86rem;
-    color: var(--muted);
+    font-size: 0.82rem;
+    color: var(--cream-dim);
     line-height: 1.8;
     border-top: 1px solid var(--hairline);
-    padding-top: 18px;
-    margin-top: 6px;
+    padding-top: 16px;
+    margin-top: 4px;
   }
 
-  /* ============================================================
-     ICON MENU — grounded in each site's actual subject
-     ============================================================ */
-  .icon-menu {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    padding: 4px 16px 0;
-    position: relative;
-    z-index: 1;
-    flex-wrap: wrap;
-  }
-  .icon-menu a {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
-    text-decoration: none;
-    color: var(--muted);
-    padding: 10px 14px;
-    border-radius: 12px;
-    transition: background 0.15s ease, color 0.15s ease;
-    min-width: 76px;
-  }
-  .icon-menu a:hover, .icon-menu a:focus-visible {
-    background: rgba(224,184,114,0.08);
-    color: var(--brass-soft);
-  }
-  .icon-menu .icon-circle {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--hairline);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .icon-menu .icon-circle svg { width: 19px; height: 19px; stroke: currentColor; }
-  .icon-menu span.label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.01em; }
-
-  /* ============================================================
-     PLAYER CARD
-     ============================================================ */
-  main { padding: 30px 0 10px; }
-
-  .card {
-    background: var(--night-2);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius);
-    padding: 28px 22px 26px;
+  /* ---- Dial unit ---- */
+  .dial-unit {
+    padding: 30px 0 6px;
     text-align: center;
   }
 
-  /* Equalizer-style live indicator — ties visually to "broadcast audio" */
-  .eq {
-    display: inline-flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 16px;
-    margin-right: 2px;
+  .dial-ring {
+    width: 208px; height: 208px;
+    margin: 0 auto;
+    border-radius: 50%;
+    padding: 13px;
+    background: repeating-conic-gradient(var(--brass) 0deg 2deg, rgba(0,0,0,0) 2deg 15deg);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
   }
-  .eq span {
-    display: block;
-    width: 3px;
-    background: var(--muted-2);
-    border-radius: 2px;
-    height: 5px;
-    transition: background 0.2s ease;
-  }
-  .eq.live span { background: var(--live); animation: eq-bounce 0.9s ease-in-out infinite; }
-  .eq.live span:nth-child(1) { animation-delay: 0s; }
-  .eq.live span:nth-child(2) { animation-delay: 0.15s; }
-  .eq.live span:nth-child(3) { animation-delay: 0.3s; }
-  .eq.live span:nth-child(4) { animation-delay: 0.45s; }
-  @keyframes eq-bounce {
-    0%, 100% { height: 5px; }
-    50% { height: 16px; }
+  .dial-face {
+    position: relative;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, var(--dial-cream), #DDCFA6 82%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35) inset;
   }
 
-  .status-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    margin-bottom: 4px;
+  .needle {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 2px; height: 66px;
+    background: linear-gradient(180deg, var(--lamp), var(--wood-dark) 92%);
+    border-radius: 2px;
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(-32deg);
+    transition: transform 0.4s ease;
   }
+  .needle.live { animation: needle-swing 1.1s ease-in-out infinite; }
+  @keyframes needle-swing {
+    0%, 100% { transform: translateX(-50%) rotate(-18deg); }
+    30% { transform: translateX(-50%) rotate(22deg); }
+    55% { transform: translateX(-50%) rotate(2deg); }
+    80% { transform: translateX(-50%) rotate(14deg); }
+  }
+  .needle-hub {
+    position: absolute; bottom: calc(50% - 5px); left: 50%;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--brass-bright), var(--brass-dark));
+    transform: translateX(-50%);
+  }
+
+  .lamp-wrap {
+    position: absolute;
+    top: 26px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .lamp {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #6b3a30;
+  }
+  .lamp.live {
+    background: var(--lamp);
+    box-shadow: 0 0 8px 2px var(--lamp-glow);
+    animation: lamp-flicker 2.4s ease-in-out infinite;
+  }
+  @keyframes lamp-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.82; }
+  }
+  .lamp-caption {
+    font-family: var(--font-label);
+    font-size: 0.52rem;
+    letter-spacing: 0.08em;
+    color: var(--dial-ink);
+    opacity: 0.55;
+  }
+
+  .play-btn {
+    position: relative;
+    width: 66px; height: 66px;
+    margin-top: 20px;
+    border-radius: 50%;
+    border: none;
+    background: radial-gradient(circle at 34% 28%, var(--brass-bright), var(--brass-dark) 80%);
+    color: var(--dial-ink);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4), 0 0 0 3px var(--dial-cream);
+    transition: transform 0.1s ease;
+  }
+  .play-btn:active { transform: scale(0.95); }
+  .play-btn svg { width: 24px; height: 24px; margin-left: 2px; }
+
   .status-label {
-    font-family: var(--font-bangla-body);
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     letter-spacing: 0.02em;
-    color: var(--muted);
+    color: var(--cream-dim);
+    margin-top: 16px;
   }
-  .status-label.live { color: var(--live); }
+  .status-label.live { color: var(--lamp-glow); }
 
   .source-note {
-    font-size: 0.78rem;
-    color: var(--muted-2);
-    margin: -2px 0 20px;
+    font-size: 0.75rem;
+    color: var(--cream-dim);
+    opacity: 0.75;
+    margin: 4px 0 0;
     min-height: 1em;
   }
-
   .connecting-note {
-    text-align: center;
     font-size: 0.72rem;
-    color: var(--brass-soft);
+    color: var(--brass-bright);
     font-weight: 600;
-    margin: -10px 0 16px;
+    margin: 4px 0 0;
     min-height: 1em;
   }
 
-  .transport {
+  /* ---- Volume fader ---- */
+  .vol-panel {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 18px;
-    margin: 6px 0 16px;
+    gap: 12px;
+    margin: 26px 6px 0;
   }
-  .play-btn {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    border: 1.5px solid var(--brass);
-    background: transparent;
-    color: var(--brass-soft);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.1s ease, color 0.15s ease;
+  .fader-label {
+    font-family: var(--font-label);
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+    color: var(--cream-dim);
+    opacity: 0.7;
     flex-shrink: 0;
   }
-  .play-btn:hover { background: rgba(224,184,114,0.1); }
-  .play-btn:active { transform: scale(0.96); }
-  .play-btn svg { width: 26px; height: 26px; margin-left: 2px; }
-
-  .vol-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-    max-width: 210px;
-  }
   .mute-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    display: flex;
-    padding: 4px;
+    background: none; border: none; cursor: pointer;
+    color: var(--brass-bright);
+    display: flex; padding: 2px; flex-shrink: 0;
   }
-  .mute-btn svg { width: 20px; height: 20px; }
+  .mute-btn svg { width: 18px; height: 18px; }
 
   input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
     flex: 1;
-    accent-color: var(--brass);
     height: 4px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--brass-dark), rgba(228,185,106,0.15));
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 22px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, var(--brass-bright), var(--brass-dark));
+    border: 1px solid var(--wood-dark);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    cursor: pointer;
+    margin-top: -1px;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 22px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, var(--brass-bright), var(--brass-dark));
+    border: 1px solid var(--wood-dark);
+    cursor: pointer;
   }
 
   .vol-pct {
-    font-size: 0.72rem;
-    color: var(--muted-2);
-    min-width: 32px;
+    font-size: 0.7rem;
+    color: var(--cream-dim);
+    min-width: 30px;
     text-align: right;
     font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
   }
 
+  /* ---- Boost switch ---- */
   .boost-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin: 4px 0 12px;
+    gap: 10px;
+    margin: 22px 0 4px;
   }
-  .boost-toggle {
-    border: 1px solid var(--hairline);
-    background: transparent;
-    color: var(--muted);
-    font-family: var(--font-ui);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    padding: 6px 13px;
+  .switch-label {
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    color: var(--cream-dim);
+  }
+  .toggle-switch {
+    position: relative;
+    width: 42px; height: 22px;
     border-radius: 999px;
+    border: 1px solid var(--brass-dark);
+    background: var(--wood-dark);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    flex-shrink: 0;
   }
-  .boost-toggle:hover { border-color: var(--brass-dim); }
-  .boost-toggle.active {
-    background: var(--brass);
-    border-color: var(--brass);
-    color: var(--night);
+  .toggle-switch .knob {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--brass-bright), var(--brass-dark));
+    transition: left 0.18s ease;
   }
+  .toggle-switch.active { background: #3A2812; border-color: var(--brass-bright); }
+  .toggle-switch.active .knob { left: 22px; }
 
   .volume-warning {
     display: none;
     text-align: center;
     font-size: 0.72rem;
-    color: #F0A99E;
-    background: rgba(226,87,76,0.1);
-    border: 1px solid rgba(226,87,76,0.3);
+    color: #F2B7A8;
+    background: rgba(226,67,47,0.12);
+    border: 1px solid rgba(226,67,47,0.35);
     border-radius: 8px;
     padding: 9px 13px;
-    margin: 0 0 18px;
+    margin: 16px 0 0;
     line-height: 1.5;
   }
   .volume-warning.show { display: block; }
 
   .desc {
-    font-family: var(--font-bangla-body);
-    font-size: 0.88rem;
-    color: var(--muted);
-    max-width: 460px;
-    margin: 0 auto 14px;
+    font-size: 0.84rem;
+    color: var(--cream-dim);
+    text-align: center;
+    max-width: 440px;
+    margin: 22px auto 10px;
   }
-
   .fallback-link {
-    display: inline-block;
-    font-size: 0.75rem;
-    color: var(--muted);
+    display: block;
+    text-align: center;
+    font-size: 0.73rem;
+    color: var(--cream-dim);
     text-decoration: none;
-    border-bottom: 1px dashed var(--muted-2);
-    padding-bottom: 1px;
+    border-bottom: 1px dashed transparent;
   }
-  .fallback-link:hover { color: var(--brass-soft); border-color: var(--brass-soft); }
+  .fallback-link:hover { color: var(--brass-bright); border-color: var(--brass-bright); }
 
   /* ============================================================
-     AL-IHSAN — styled like a newspaper masthead strip
+     PRESETS — the four partner sites, styled as radio preset
+     buttons, placed BELOW the set (as requested)
      ============================================================ */
-  .ihsan-strip {
+  .presets-wrap { padding: 26px 0 6px; }
+  .presets-heading {
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--cream-dim);
+    opacity: 0.7;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .preset-btn {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
-    background: var(--night-3);
-    border: 1px solid var(--hairline);
-    border-left: 3px solid var(--brass);
-    border-radius: 10px;
-    padding: 15px 17px;
-    margin-top: 22px;
+    gap: 7px;
     text-decoration: none;
-    text-align: left;
+    color: var(--cream-dim);
+    background: linear-gradient(160deg, var(--wood-light), var(--wood));
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 12px 4px 10px;
+    transition: border-color 0.15s ease, color 0.15s ease;
   }
-  .ihsan-strip .mast {
-    font-family: var(--font-bangla-display);
-    font-weight: 700;
-    color: var(--linen);
-    font-size: 0.98rem;
-    margin: 0 0 3px;
+  .preset-btn:hover, .preset-btn:focus-visible { border-color: var(--brass-bright); color: var(--brass-bright); }
+  .preset-btn .icon-circle {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--brass-dark);
+    display: flex; align-items: center; justify-content: center;
   }
-  .ihsan-strip .sub {
-    font-size: 0.76rem;
-    color: var(--muted);
-    margin: 0;
-  }
-  .ihsan-strip .arrow { color: var(--brass-soft); margin-left: auto; flex-shrink: 0; font-size: 1.1rem; }
+  .preset-btn .icon-circle svg { width: 15px; height: 15px; stroke: currentColor; }
+  .preset-btn .label { font-size: 0.62rem; font-weight: 600; text-align: center; line-height: 1.3; }
 
   /* ============================================================
      ABOUT / NOTIFY
      ============================================================ */
-  .about, .notify {
-    padding: 34px 0 6px;
-    text-align: center;
-  }
+  .about, .notify { padding: 34px 0 6px; text-align: center; }
   .about h2, .notify h2 {
     font-family: var(--font-bangla-display);
-    color: var(--brass-soft);
-    font-size: 1.15rem;
+    color: var(--brass-bright);
+    font-size: 1.08rem;
     font-weight: 700;
     margin: 0 0 12px;
   }
   .about p, .notify p {
-    font-family: var(--font-bangla-body);
-    font-size: 0.86rem;
-    color: var(--muted);
-    max-width: 480px;
+    font-size: 0.84rem;
+    color: var(--cream-dim);
+    max-width: 460px;
     margin: 0 auto;
   }
   .notify p { margin-bottom: 16px; }
@@ -462,29 +503,25 @@
     padding: 11px 14px;
     border: 1px solid var(--hairline);
     border-radius: 10px;
-    background: var(--night-2);
-    color: var(--ink);
-    font-size: 0.88rem;
-    font-family: var(--font-ui);
+    background: var(--wood-dark);
+    color: var(--cream-text);
+    font-size: 0.86rem;
+    font-family: var(--font-bangla-body);
   }
-  .notify-form input::placeholder { color: var(--muted-2); }
+  .notify-form input::placeholder { color: var(--cream-dim); opacity: 0.6; }
   .notify-form button {
     background: var(--brass);
-    color: var(--night);
+    color: var(--dial-ink);
     border: none;
     padding: 11px 18px;
     border-radius: 10px;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.83rem;
     cursor: pointer;
     white-space: nowrap;
   }
-  .notify-form button:hover { background: var(--brass-soft); }
-  .notify-hint {
-    font-size: 0.72rem;
-    color: var(--muted-2);
-    margin-top: 12px !important;
-  }
+  .notify-form button:hover { background: var(--brass-bright); }
+  .notify-hint { font-size: 0.7rem; color: var(--cream-dim); opacity: 0.7; margin-top: 12px !important; }
 
   /* ============================================================
      FOOTER
@@ -492,138 +529,144 @@
   footer {
     text-align: center;
     padding: 30px 20px 34px;
-    margin-top: 30px;
+    margin-top: 28px;
     border-top: 1px solid var(--hairline);
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     line-height: 1.9;
-    color: var(--muted-2);
+    color: var(--cream-dim);
+    opacity: 0.85;
   }
-  footer a { color: var(--muted); }
-  footer a:hover { color: var(--brass-soft); }
-  footer .copyright { margin-top: 8px; color: var(--muted-2); opacity: 0.8; }
+  footer a { color: var(--cream-dim); }
+  footer a:hover { color: var(--brass-bright); }
+  footer .copyright { margin-top: 8px; opacity: 0.75; }
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="wave-arcs" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+<div class="wrap">
+  <div class="cabinet-wrap">
+    <div class="cabinet">
+      <span class="screw tl" aria-hidden="true"></span>
+      <span class="screw tr" aria-hidden="true"></span>
+      <span class="screw bl" aria-hidden="true"></span>
+      <span class="screw br" aria-hidden="true"></span>
 
-  <div class="hero-inner">
-    <img class="logo-mark" src="logo.png" alt="আল হিকমাহ" />
+      <div class="nameplate">
+        <div class="medallion">
+          <div class="medallion-inner"><img src="logo.png" alt="আল হিকমাহ" /></div>
+        </div>
 
-    <div class="honorific">
-      <p class="arabic">
-        خَلِيْفَةُ اللهِ، خَلِيْفَةُ رَسُوْلِ اللهِ، رَءُوْفٌ رَّحِيْمٌ، رَحْـمَةٌ لِّلْعَالَـمِيْـنَ، صَاحِبُ سَيِّدِ سَيِّدِ الْاَعْيَادِ شَرِيْفٍ، صَاحِبِ نِعْمَتْ، اَلسَّفَّاحُ، اَلْـجَبَّارِىُّ الْاَوَّلُ، اَلْـقَوِىُّ الْاَوَّلُ، حَبِيْبُ اللهِ، مُطَهِّرٌ، اَهْلُ بَــيْتِ رَسُوْلِ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، قَائِمُ مَقَامِ حَبِيْبِ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، مَوْلـٰـنَا مَـمْدُوْحْ مُرْشِدْ قِـبْـلَةْ
-        <span class="name-line">سَيِّدُنَا حَضْرَتْ سُلْطَانٌ نَّصِيْـرٌ عَلَيْهِ السَّلَامُ</span>
-        اَلْـحَسَنِـىُّ وَالْـحُسَيْنِـىُّ وَالْقُرَيْشِىُّ، رَاجَارْبَاغُ شَرِيْفٌ، دَاكَا
-      </p>
+        <div class="honorific">
+          <p class="arabic">
+            خَلِيْفَةُ اللهِ، خَلِيْفَةُ رَسُوْلِ اللهِ، رَءُوْفٌ رَّحِيْمٌ، رَحْـمَةٌ لِّلْعَالَـمِيْـنَ، صَاحِبُ سَيِّدِ سَيِّدِ الْاَعْيَادِ شَرِيْفٍ، صَاحِبِ نِعْمَتْ، اَلسَّفَّاحُ، اَلْـجَبَّارِىُّ الْاَوَّلُ، اَلْـقَوِىُّ الْاَوَّلُ، حَبِيْبُ اللهِ، مُطَهِّرٌ، اَهْلُ بَــيْتِ رَسُوْلِ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، قَائِمُ مَقَامِ حَبِيْبِ اللهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، مَوْلـٰـنَا مَـمْدُوْحْ مُرْشِدْ قِـبْـلَةْ
+            <span class="name-line">سَيِّدُنَا حَضْرَتْ سُلْطَانٌ نَّصِيْـرٌ عَلَيْهِ السَّلَامُ</span>
+            اَلْـحَسَنِـىُّ وَالْـحُسَيْنِـىُّ وَالْقُرَيْشِىُّ، رَاجَارْبَاغُ شَرِيْفٌ، دَاكَا
+          </p>
 
-      <p class="bangla">
-        খলীফাতুল্লাহ, খলীফাতু রসূলিল্লাহ, রঊফুর রহীম, রহমাতুল্লিল ‘আলামীন, ছাহিবু সাইয়্যিদি সাইয়্যিদিল আ’ইয়াদ শরীফ, ছাহিবে নেয়ামত, আস সাফফাহ, আল জাব্বারিউল আউওয়াল, আল ক্বউইউল আউওয়াল, হাবীবুল্লাহ, মুত্বহ্হার, মুত্বহ্হির, আহলু বাইতি রসূলিল্লাহ ছল্লাল্লাহু আলাইহি ওয়া সাল্লাম, ক্বায়িম মাক্বামে হাবীবুল্লাহ ছল্লাল্লাহু আলাইহি ওয়া সাল্লাম, মাওলানা মামদূহ মুর্শিদ ক্বিবলা
-        <span class="name-line">সাইয়্যিদুনা হযরত সুলত্বানুন নাছীর আলাইহিস সালাম</span>
-        আল হাসানী ওয়াল হুসাইনী ওয়াল কুরাঈশী, রাজারবাগ শরীফ, ঢাকা।
-      </p>
+          <p class="bangla">
+            খলীফাতুল্লাহ, খলীফাতু রসূলিল্লাহ, রঊফুর রহীম, রহমাতুল্লিল ‘আলামীন, ছাহিবু সাইয়্যিদি সাইয়্যিদিল আ’ইয়াদ শরীফ, ছাহিবে নেয়ামত, আস সাফফাহ, আল জাব্বারিউল আউওয়াল, আল ক্বউইউল আউওয়াল, হাবীবুল্লাহ, মুত্বহ্হার, মুত্বহ্হির, আহলু বাইতি রসূলিল্লাহ ছল্লাল্লাহু আলাইহি ওয়া সাল্লাম, ক্বায়িম মাক্বামে হাবীবুল্লাহ ছল্লাল্লাহু আলাইহি ওয়া সাল্লাম, মাওলানা মামদূহ মুর্শিদ ক্বিবলা
+            <span class="name-line">সাইয়্যিদুনা হযরত সুলত্বানুন নাছীর আলাইহিস সালাম</span>
+            আল হাসানী ওয়াল হুসাইনী ওয়াল কুরাঈশী, রাজারবাগ শরীফ, ঢাকা।
+          </p>
 
-      <p class="english">
-        Khalifatullah, Khalifatu Rasulillah, Ra'ufur Rahim, Rahmatullil 'Aalameen, Sahibu Sayyidi Sayyidil A'yaad Shareef, Sahibe Ne'amat, As-Saffah, Al-Jabbariul Awwal, Al-Qawiul Awwal, Habibullah, Mutahhar, Mutahhir, Ahlu Bayti Rasulillah (peace and blessings of Allah be upon him), Qa'im Maqame Habibullah (peace and blessings of Allah be upon him), Maulana Mamduh Murshid Qiblah
-        <span class="name-line">Sayyiduna Hadhrat Sultanun Nasir (peace be upon him)</span>
-        Al-Hasani wal Husaini wal Quraishi, Rajarbag Shareef, Dhaka.
-      </p>
+          <p class="english">
+            Khalifatullah, Khalifatu Rasulillah, Ra'ufur Rahim, Rahmatullil 'Aalameen, Sahibu Sayyidi Sayyidil A'yaad Shareef, Sahibe Ne'amat, As-Saffah, Al-Jabbariul Awwal, Al-Qawiul Awwal, Habibullah, Mutahhar, Mutahhir, Ahlu Bayti Rasulillah Sallallahu Alaihi Wa Sallam, Qa'im Maqame Habibullah Sallallahu Alaihi Wa Sallam, Maulana Mamduh Murshid Qiblah
+            <span class="name-line">Sayyiduna Hadhrat Sultanun Nasir Alaihis Salam</span>
+            Al-Hasani wal Husaini wal Quraishi, Rajarbag Shareef, Dhaka.
+          </p>
 
-      <p class="tagline">
-        উনার পবিত্র ওয়াজ শরীফ অর্থাৎ পবিত্র নছীহত শরীফ এখন ইন্টারনেট ভয়েস আল হিকমাহ-এর মাধ্যমে বিশ্বের যেকোনো প্রান্ত থেকে সরাসরি শোনা যাচ্ছে।
-      </p>
-    </div>
-  </div>
-
-  <nav class="icon-menu" aria-label="সম্পর্কিত সাইট">
-    <a href="https://al-hilaal.net/" target="_blank" rel="noopener">
-      <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg></span>
-      <span class="label">আল-হিলাল</span>
-    </a>
-    <a href="https://www.al-ihsan.net/" target="_blank" rel="noopener">
-      <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 0 1 1"/><path d="M4 4v14a2 2 0 0 0 2 2h13"/><line x1="7" y1="8" x2="15" y2="8"/><line x1="7" y1="12" x2="15" y2="12"/></svg></span>
-      <span class="label">আল-ইহসান</span>
-    </a>
-    <a href="https://ahkamuzzakat.com/" target="_blank" rel="noopener">
-      <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="8.2"/><path d="M9.5 9.3a2.6 2.6 0 1 1 0 5.2M9 10h5M9 14h4"/></svg></span>
-      <span class="label">আহকামুয যাকাত</span>
-    </a>
-    <a href="https://al-furqan.net/" target="_blank" rel="noopener">
-      <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H12v16h6.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg></span>
-      <span class="label">আল-ফুরকান</span>
-    </a>
-  </nav>
-</div>
-
-<main>
-  <div class="wrap">
-
-    <div class="card">
-      <div class="status-row">
-        <span id="statusEq" class="eq checking"><span></span><span></span><span></span><span></span></span>
-        <span id="statusLabel" class="status-label">যাচাই করা হচ্ছে...</span>
+          <p class="tagline">
+            উনার পবিত্র ওয়াজ শরীফ অর্থাৎ পবিত্র নছীহত শরীফ এখন ইন্টারনেট ভয়েস আল হিকমাহ-এর মাধ্যমে বিশ্বের যেকোনো প্রান্ত থেকে সরাসরি শোনা যাচ্ছে।
+          </p>
+        </div>
       </div>
-      <p id="sourceNote" class="source-note"></p>
-      <p id="connectingNote" class="connecting-note"></p>
 
-      <div id="audioTransport" class="transport">
-        <button id="playBtn" class="play-btn" aria-label="Play">
-          <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </button>
+      <div class="dial-unit">
+        <div class="dial-ring">
+          <div class="dial-face">
+            <div class="lamp-wrap">
+              <span id="lamp" class="lamp"></span>
+              <span id="lampCaption" class="lamp-caption">STANDBY</span>
+            </div>
+            <span id="needle" class="needle"></span>
+            <span class="needle-hub" aria-hidden="true"></span>
 
-        <div class="vol-group">
+            <button id="playBtn" class="play-btn" aria-label="Play">
+              <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <p id="statusLabel" class="status-label">যাচাই করা হচ্ছে...</p>
+        <p id="sourceNote" class="source-note"></p>
+        <p id="connectingNote" class="connecting-note"></p>
+
+        <div class="vol-panel">
+          <span class="fader-label">VOL</span>
           <button id="muteBtn" class="mute-btn" aria-label="Mute">
             <svg id="volIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
           </button>
           <input id="volumeSlider" type="range" min="0" max="100" value="100" aria-label="Volume" />
           <span id="volPct" class="vol-pct">100%</span>
         </div>
+
+        <div class="boost-row">
+          <span class="switch-label">বুস্ট</span>
+          <button type="button" id="boostToggle" class="toggle-switch" aria-pressed="false" aria-label="Unlimited volume boost">
+            <span class="knob"></span>
+          </button>
+        </div>
+        <p id="volumeWarning" class="volume-warning">
+          ⚠️ বেশি বুস্ট করলে শব্দ বিকৃত (distort) হতে পারে এবং দীর্ঘক্ষণ শুনলে স্পিকার বা কানের ক্ষতি হতে পারে। সতর্কতার সাথে বাড়ান, শব্দ কর্কশ শোনালে কমিয়ে দিন।
+        </p>
+
+        <p class="desc">
+          রাজারবাগ শরীফ থেকে সরাসরি পবিত্র ওয়াজ শরীফ সম্প্রচার। প্লে চাপুন — সম্প্রচার লাইভ থাকলে স্বয়ংক্রিয়ভাবে বাজতে শুরু করবে।
+        </p>
+        <a class="fallback-link" href="https://live.al-hikmah.net/;" target="_blank" rel="noopener">প্লেয়ার কাজ না করলে মূল স্ট্রিম লিংক খুলুন</a>
       </div>
+    </div>
+  </div>
 
-      <div class="boost-row">
-        <button type="button" id="boostToggle" class="boost-toggle" aria-pressed="false">
-          🔊 সীমাহীন ভলিউম বুস্ট
-        </button>
-      </div>
-      <p id="volumeWarning" class="volume-warning">
-        ⚠️ বেশি বুস্ট করলে শব্দ বিকৃত (distort) হতে পারে এবং দীর্ঘক্ষণ শুনলে স্পিকার বা কানের ক্ষতি হতে পারে। সতর্কতার সাথে বাড়ান, শব্দ কর্কশ শোনালে কমিয়ে দিন।
-      </p>
-
-      <p class="desc">
-        রাজারবাগ শরীফ থেকে সরাসরি পবিত্র ওয়াজ শরীফ সম্প্রচার। প্লে চাপুন — সম্প্রচার লাইভ থাকলে স্বয়ংক্রিয়ভাবে বাজতে শুরু করবে।
-      </p>
-
-      <a class="fallback-link" href="https://live.al-hikmah.net/;" target="_blank" rel="noopener">প্লেয়ার কাজ না করলে মূল স্ট্রিম লিংক খুলুন</a>
-
-      <a class="ihsan-strip" href="https://www.al-ihsan.net/" target="_blank" rel="noopener">
-        <span>
-          <p class="mast">আল-ইহসান শরীফ পড়ুন</p>
-          <p class="sub">রাজারবাগ শরীফ থেকে প্রকাশিত দৈনিক পত্রিকা</p>
-        </span>
-        <span class="arrow">→</span>
+  <div class="presets-wrap">
+    <p class="presets-heading">প্রিসেট স্টেশন</p>
+    <div class="presets">
+      <a class="preset-btn" href="https://al-hilaal.net/" target="_blank" rel="noopener">
+        <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg></span>
+        <span class="label">আল-হিলাল</span>
+      </a>
+      <a class="preset-btn" href="https://www.al-ihsan.net/" target="_blank" rel="noopener">
+        <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 0 1 1"/><path d="M4 4v14a2 2 0 0 0 2 2h13"/><line x1="7" y1="8" x2="15" y2="8"/><line x1="7" y1="12" x2="15" y2="12"/></svg></span>
+        <span class="label">আল-ইহসান</span>
+      </a>
+      <a class="preset-btn" href="https://ahkamuzzakat.com/" target="_blank" rel="noopener">
+        <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="8.2"/><path d="M9.5 9.3a2.6 2.6 0 1 1 0 5.2M9 10h5M9 14h4"/></svg></span>
+        <span class="label">আহকামুয যাকাত</span>
+      </a>
+      <a class="preset-btn" href="https://al-furqan.net/" target="_blank" rel="noopener">
+        <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H12v16h6.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg></span>
+        <span class="label">আল-ফুরকান</span>
       </a>
     </div>
-
-    <section class="about">
-      <h2>এই ওয়েবসাইট সম্পর্কে</h2>
-      <p>
-        এটি রাজারবাগ শরীফ (আল হিকমাহ) থেকে সম্প্রচারিত লাইভ অডিও শোনার একটি সহায়ক ওয়েবসাইট। মোবাইল থেকে সহজে শোনার জন্য মূল সম্প্রচারের সাথে সরাসরি সংযুক্ত থাকে, স্পষ্ট লাইভ/অফলাইন নির্দেশক ও একটি সাধারণ প্লে বাটন সহ।
-      </p>
-    </section>
-
-    <section class="notify">
-      <h2>লাইভ শুরু হলে জানতে চান?</h2>
-      <p>আপনার ইমেইল দিন, সম্প্রচার শুরু হওয়ার সাথে সাথেই জানিয়ে দেওয়া হবে।</p>
-      <form class="notify-form" onsubmit="event.preventDefault();">
-        <input type="email" placeholder="you@example.com" required />
-        <button type="submit">Notify me</button>
-      </form>
-      <p class="notify-hint">এই মুহূর্তে শুধু UI — পরবর্তীতে প্রকৃত ব্যাকএন্ডের সাথে যুক্ত করা যাবে।</p>
-    </section>
-
   </div>
-</main>
+
+  <section class="about">
+    <h2>এই ওয়েবসাইট সম্পর্কে</h2>
+    <p>
+      এটি রাজারবাগ শরীফ (আল হিকমাহ) থেকে সম্প্রচারিত লাইভ অডিও শোনার একটি সহায়ক ওয়েবসাইট। মোবাইল থেকে সহজে শোনার জন্য মূল সম্প্রচারের সাথে সরাসরি সংযুক্ত থাকে, স্পষ্ট লাইভ/অফলাইন নির্দেশক ও একটি সাধারণ প্লে বাটন সহ।
+    </p>
+  </section>
+
+  <section class="notify">
+    <h2>লাইভ শুরু হলে জানতে চান?</h2>
+    <p>আপনার ইমেইল দিন, সম্প্রচার শুরু হওয়ার সাথে সাথেই জানিয়ে দেওয়া হবে।</p>
+    <form class="notify-form" onsubmit="event.preventDefault();">
+      <input type="email" placeholder="you@example.com" required />
+      <button type="submit">Notify me</button>
+    </form>
+    <p class="notify-hint">এই মুহূর্তে শুধু UI — পরবর্তীতে প্রকৃত ব্যাকএন্ডের সাথে যুক্ত করা যাবে।</p>
+  </section>
+</div>
 
 <footer>
   <div>অনানুষ্ঠানিক সহায়ক ওয়েবসাইট — সম্প্রচারকারীর সাথে সরাসরি সম্পৃক্ত নয়।</div>
@@ -635,7 +678,9 @@
 const STATUS_API_URL = '/api/live-status';
 const POLL_INTERVAL_MS = 60000;
 
-const statusEq = document.getElementById('statusEq');
+const lamp = document.getElementById('lamp');
+const lampCaption = document.getElementById('lampCaption');
+const needle = document.getElementById('needle');
 const statusLabel = document.getElementById('statusLabel');
 const sourceNote = document.getElementById('sourceNote');
 const connectingNote = document.getElementById('connectingNote');
@@ -653,9 +698,12 @@ let lastData = null;
 
 function setStatus(state) {
   // state: 'checking' | 'live' | 'offline'
-  statusEq.className = 'eq' + (state === 'live' ? ' live' : '');
-  statusLabel.className = 'status-label ' + (state === 'live' ? 'live' : '');
-  statusLabel.textContent = state === 'live' ? 'লাইভ চলছে' : state === 'offline' ? 'অফলাইন' : 'যাচাই করা হচ্ছে...';
+  const live = state === 'live';
+  lamp.classList.toggle('live', live);
+  lampCaption.textContent = live ? 'ON AIR' : 'STANDBY';
+  needle.classList.toggle('live', live && isPlaying);
+  statusLabel.className = 'status-label ' + (live ? 'live' : '');
+  statusLabel.textContent = live ? 'লাইভ চলছে' : state === 'offline' ? 'অফলাইন' : 'যাচাই করা হচ্ছে...';
 }
 
 function showAudioSource(url, bitrateKbps) {
@@ -726,11 +774,13 @@ audio.addEventListener('play', () => {
   isPlaying = true;
   playIcon.innerHTML = ICON_PAUSE;
   playBtn.setAttribute('aria-label', 'Pause');
+  needle.classList.toggle('live', lamp.classList.contains('live'));
 });
 audio.addEventListener('pause', () => {
   isPlaying = false;
   playIcon.innerHTML = ICON_PLAY;
   playBtn.setAttribute('aria-label', 'Play');
+  needle.classList.remove('live');
 });
 
 muteBtn.addEventListener('click', () => {
