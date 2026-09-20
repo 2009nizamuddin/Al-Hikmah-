@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>আর্কাইভ — আল হিকমাহ লাইভ</title>
+<meta name="description" content="আল হিকমাহ লাইভের আগের দিনের রেকর্ডিং, তারিখ অনুযায়ী।" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;1,400&family=Noto+Serif+Bengali:wght@500;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --night:        #0D1226;
+    --night-2:      #161C38;
+    --brass:        #C08B3E;
+    --brass-soft:   #E3B872;
+    --linen:        #F3EEE4;
+    --ink:          #ECE8DC;
+    --muted:        #8B92B4;
+    --muted-2:      #5C6288;
+    --hairline:     rgba(227, 184, 114, 0.16);
+
+    --font-arabic:  'Amiri', serif;
+    --font-display: 'Noto Serif Bengali', serif;
+    --font-body:    'Hind Siliguri', sans-serif;
+    --max-width: 640px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--brass-soft); }
+  .wrap { max-width: var(--max-width); margin: 0 auto; padding: 0 20px; }
+
+  header { padding: 36px 0 20px; text-align: center; }
+  header h1 {
+    font-family: var(--font-display);
+    color: var(--brass-soft);
+    font-size: 1.32rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+  header p { color: var(--muted); font-size: 0.85rem; margin: 0; }
+  .back-link {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--muted-2);
+  }
+  .back-link:hover { color: var(--brass-soft); border-color: var(--brass-soft); }
+
+  main { padding: 6px 0 40px; }
+
+  .state-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 40px 10px;
+  }
+
+  .rec-card {
+    background: var(--night-2);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    margin-bottom: 14px;
+  }
+  .rec-dates { margin: 0 0 14px; }
+  .rec-dates .en { font-weight: 700; color: var(--linen); font-size: 0.96rem; }
+  .rec-dates .hijri {
+    font-family: var(--font-arabic);
+    direction: rtl;
+    color: var(--brass-soft);
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+  .rec-dates .bn { color: var(--muted); font-size: 0.82rem; margin-top: 4px; }
+
+  audio { width: 100%; margin: 4px 0 14px; }
+  audio::-webkit-media-controls-panel { background-color: var(--night); }
+
+  .rec-actions { display: flex; align-items: center; gap: 10px; }
+  .dl-link {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--brass-soft);
+    text-decoration: none;
+    border: 1px solid var(--hairline);
+    padding: 7px 14px;
+    border-radius: 999px;
+  }
+  .dl-link:hover { border-color: var(--brass-soft); }
+  .rec-size { font-size: 0.72rem; color: var(--muted-2); margin-left: auto; }
+
+  footer {
+    text-align: center;
+    padding: 26px 20px 34px;
+    margin-top: 20px;
+    border-top: 1px solid var(--hairline);
+    font-size: 0.74rem;
+    color: var(--muted-2);
+    line-height: 1.9;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>রেকর্ডিং আর্কাইভ</h1>
+    <p>আগের দিনের লাইভ সম্প্রচার — তারিখ অনুযায়ী</p>
+    <a class="back-link" href="index.html">← মূল পাতায় ফিরুন</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div id="list"></div>
+  </div>
+</main>
+
+<footer>
+  অনানুষ্ঠানিক সহায়ক আর্কাইভ — সম্প্রচারকারীর সাথে সরাসরি সম্পৃক্ত নয়।<br />
+  হিজরি ও বঙ্গাব্দ তারিখ স্বয়ংক্রিয়ভাবে হিসাব করা — চাঁদ দেখা কমিটির ঘোষণার সাথে কখনো কখনো ১ দিন হেরফের হতে পারে।
+</footer>
+
+<script>
+  // IMPORTANT: this must match the GitHub repo this site is deployed
+  // from. Update owner/repo below if the repository is ever renamed or
+  // moved.
+  const REPO_OWNER = '2009nizamuddin';
+  const REPO_NAME = 'Al-Hikmah-';
+  const MANIFEST_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/archive-data/manifest.json`;
+
+  const listEl = document.getElementById('list');
+
+  function formatSize(bytes) {
+    if (!bytes) return '';
+    const mb = bytes / (1024 * 1024);
+    return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  async function load() {
+    listEl.innerHTML = '<p class="state-note">লোড হচ্ছে...</p>';
+    let manifest;
+    try {
+      const res = await fetch(MANIFEST_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      manifest = await res.json();
+    } catch (e) {
+      listEl.innerHTML = '<p class="state-note">আর্কাইভ এই মুহূর্তে লোড করা যাচ্ছে না। একটু পর আবার চেষ্টা করুন।</p>';
+      return;
+    }
+
+    if (!Array.isArray(manifest) || manifest.length === 0) {
+      listEl.innerHTML = '<p class="state-note">এখনো কোনো রেকর্ডিং জমা হয়নি।</p>';
+      return;
+    }
+
+    const sorted = [...manifest].sort((a, b) => (b.iso || '').localeCompare(a.iso || ''));
+
+    listEl.innerHTML = sorted.map(rec => `
+      <div class="rec-card">
+        <div class="rec-dates">
+          <div class="en">${escapeHtml(rec.english || rec.iso)}</div>
+          ${rec.hijri ? `<div class="hijri">${escapeHtml(rec.hijri)}</div>` : ''}
+          ${rec.bengali ? `<div class="bn">${escapeHtml(rec.bengali)}</div>` : ''}
+        </div>
+        <audio controls preload="none" src="${escapeHtml(rec.assetUrl)}"></audio>
+        <div class="rec-actions">
+          <a class="dl-link" href="${escapeHtml(rec.assetUrl)}" download>ডাউনলোড</a>
+          <span class="rec-size">${formatSize(rec.sizeBytes)}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  load();
+</script>
+
+</body>
+</html>
