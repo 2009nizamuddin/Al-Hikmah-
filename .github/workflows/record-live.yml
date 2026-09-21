@@ -2,10 +2,15 @@ name: Record Live Broadcast
 
 on:
   schedule:
-    # Every 10 minutes. Most runs just check the status and exit in a
-    # few seconds — recording only happens on the run(s) that catch a
-    # live broadcast.
-    - cron: '*/10 * * * *'
+    # Every 5 minutes — the minimum interval GitHub Actions allows. Most
+    # runs just check the status and exit in a few seconds — recording
+    # only happens on the run(s) that catch a live broadcast. Note:
+    # GitHub only guarantees this on a best-effort basis and can delay a
+    # scheduled run by several minutes during busy periods — this is a
+    # platform limit, not something this workflow controls. If a broadcast
+    # is missed for a while, you can always trigger it instantly yourself
+    # with "Run workflow" below.
+    - cron: '*/5 * * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -22,9 +27,12 @@ concurrency:
 jobs:
   record:
     runs-on: ubuntu-latest
-    # A bit above the 6-hour recording ceiling in scripts/record-live.js,
-    # so the job itself never gets killed mid-upload.
-    timeout-minutes: 370
+    # A bit above GitHub's own 6-hour hard job ceiling isn't possible (that
+    # ceiling can't be raised), so this just needs to be at least that high;
+    # the script itself now stops starting new segments with headroom to
+    # spare (see JOB_SOFT_LIMIT_MS in record-live.js) so the job always
+    # finishes cleanly on its own before this would ever be hit.
+    timeout-minutes: 360
     steps:
       - name: Checkout
         uses: actions/checkout@v4
