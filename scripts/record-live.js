@@ -2,20 +2,27 @@
 'use strict';
 
 /**
- * Runs on a schedule via .github/workflows/record-live.yml (every 10
+ * Runs on a schedule via .github/workflows/record-live.yml (every 5
  * minutes). Each run:
  *   1. Checks /api/live-status. If not live, exits immediately (cheap,
  *      fast — this is what most runs do, since the broadcast isn't live
  *      most of the day).
- *   2. If live, records the stream with ffmpeg, polling live-status every
- *      60s so it stops recording soon after the real broadcast ends
- *      (rather than recording a looped fallback file for hours). A 6-hour
- *      ceiling (MAX_RECORD_SECONDS) is a safety net in case polling ever
- *      fails to detect the end.
- *   3. Uploads the finished file as a GitHub Release asset (releases are
- *      built for hosting downloadable binaries — this keeps the actual
- *      audio out of the git history that Netlify deploys from, so it
- *      never bloats or slows down the website).
+ *   2. If live, records the stream with ffmpeg in ~2-hour segments,
+ *      polling live-status every 60s so each segment stops soon after the
+ *      real broadcast ends (rather than recording a looped fallback file
+ *      for hours). If a segment ends only because it hit the 2h checkpoint
+ *      (broadcast is still live), the script immediately starts the next
+ *      segment in the same run — so a long broadcast becomes several
+ *      back-to-back parts with no gap, not one huge unsafe file. A soft
+ *      time limit stops starting new segments a little before GitHub's
+ *      hard 6-hour job ceiling; if a broadcast runs past that, the next
+ *      scheduled run picks up the remainder as a further part.
+ *   3. Uploads each finished segment as its own GitHub Release asset
+ *      (releases are built for hosting downloadable binaries — this keeps
+ *      the actual audio out of the git history that Netlify deploys from,
+ *      so it never bloats or slows down the website). If a tag/date is
+ *      already taken (a second session the same day, or a further part),
+ *      a "-2", "-part2", etc. suffix is used instead of failing.
  *   4. Appends an entry (Gregorian / Hijri / Bengali dates + the asset's
  *      download URL) to manifest.json on a dedicated `archive-data`
  *      branch. That branch is NOT the one Netlify deploys from, so
@@ -33,7 +40,8 @@ const fs = require('fs');
 const path = require('path');
 
 const STATUS_URL = process.env.STATUS_URL || 'https://nijamuddin.netlify.app/api/live-status';
-const MAX_RECORD_SECONDS = 6 * 60 * 60; // hard safety ceiling per recording
+const SEGMENT_SECONDS = 2 * 60 * 60; // record in ~2h chunks so a long broadcast is safely checkpointed and uploaded piece by piece, rather than risking hours of audio in one unsaved file
+const JOB_SOFT_LIMIT_MS = (5 * 60 + 45) * 60 * 1000; // stop starting new segments once this close to GitHub's hard 6h job limit — the next scheduled run picks up the rest automatically
 const POLL_INTERVAL_MS = 60 * 1000; // how often to re-check live-status while recording
 const MIN_VALID_FILE_BYTES = 150 * 1024; // discard obviously-too-short false-positive recordings
 
@@ -135,6 +143,25 @@ function shOut(cmd) {
   return execSync(cmd, { encoding: 'utf8', shell: '/bin/bash' }).trim();
 }
 
+function releaseExists(tag) {
+  try {
+    execSync(`gh release view "${tag}"`, { stdio: 'ignore', shell: '/bin/bash' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// If the day's tag is already taken (e.g. a second Waz session recorded on
+// the same calendar day), pick the next free "-2", "-3", ... suffix instead
+// of failing outright.
+function uniqueTag(baseTag) {
+  if (!releaseExists(baseTag)) return baseTag;
+  let n = 2;
+  while (releaseExists(`${baseTag}-${n}`)) n++;
+  return `${baseTag}-${n}`;
+}
+
 /* ============================================================
    Recording
    ============================================================ */
@@ -146,14 +173,16 @@ function recordStream(streamUrl, outFile) {
       '-user_agent', 'AlHikmahLiveRecorder/1.0',
       '-i', streamUrl,
       '-c', 'copy',
-      '-t', String(MAX_RECORD_SECONDS),
+      '-t', String(SEGMENT_SECONDS),
       outFile
     ], { stdio: 'inherit' });
 
     let stopped = false;
-    const stop = () => {
+    let hitSegmentCap = false;
+    const stop = (capHit) => {
       if (stopped) return;
       stopped = true;
+      if (capHit) hitSegmentCap = true;
       log('stopping recording (sending SIGINT to ffmpeg so the file closes cleanly)...');
       ff.kill('SIGINT');
     };
@@ -161,13 +190,13 @@ function recordStream(streamUrl, outFile) {
     const startedMs = Date.now();
     const poller = setInterval(async () => {
       const elapsed = (Date.now() - startedMs) / 1000;
-      if (elapsed >= MAX_RECORD_SECONDS) { clearInterval(poller); stop(); return; }
+      if (elapsed >= SEGMENT_SECONDS) { clearInterval(poller); stop(true); return; }
       try {
         const data = await fetchLiveStatus();
         if (!data || !data.live) {
           log('live-status now reports offline — ending recording.');
           clearInterval(poller);
-          stop();
+          stop(false);
         }
       } catch (e) {
         log(`status check failed during recording, will retry next tick: ${e.message}`);
@@ -177,7 +206,7 @@ function recordStream(streamUrl, outFile) {
     ff.on('close', (code) => {
       clearInterval(poller);
       log(`ffmpeg exited with code ${code}`);
-      resolve();
+      resolve({ hitSegmentCap });
     });
   });
 }
@@ -226,7 +255,7 @@ function writeManifestToBranch(manifest, commitMessage) {
 
 async function main() {
   log('checking live status...');
-  const status = await fetchLiveStatus();
+  let status = await fetchLiveStatus();
 
   if (!status || !status.live || !status.streamUrl) {
     log('not live right now — nothing to do.');
@@ -235,44 +264,66 @@ async function main() {
 
   log(`live! source=${status.source} bitrate=${status.bitrateKbps || 'unknown'}kbps`);
 
-  const startedAt = new Date();
-  const dates = allDateStrings(startedAt);
-  const outFile = `/tmp/${dates.iso}.mp3`;
+  const jobStartedMs = Date.now();
+  let part = 1;
 
-  log(`recording to ${outFile}`);
-  log(`  Gregorian: ${dates.english}`);
-  log(`  Hijri:     ${dates.hijri}`);
-  log(`  Bengali:   ${dates.bengali}`);
+  while (status && status.live && status.streamUrl) {
+    if (Date.now() - jobStartedMs > JOB_SOFT_LIMIT_MS) {
+      log("approaching this job's safe time limit — stopping here; the next scheduled run will pick up the rest automatically.");
+      break;
+    }
 
-  await recordStream(status.streamUrl, outFile);
+    const startedAt = new Date();
+    const dates = allDateStrings(startedAt);
+    const outFile = part === 1 ? `/tmp/${dates.iso}.mp3` : `/tmp/${dates.iso}-part${part}.mp3`;
 
-  if (!fs.existsSync(outFile) || fs.statSync(outFile).size < MIN_VALID_FILE_BYTES) {
-    log('recording too short or missing — skipping upload (likely a brief false-positive live reading).');
-    return;
+    log(`recording segment ${part} to ${outFile}`);
+    log(`  Gregorian: ${dates.english}`);
+    log(`  Hijri:     ${dates.hijri}`);
+    log(`  Bengali:   ${dates.bengali}`);
+
+    const { hitSegmentCap } = await recordStream(status.streamUrl, outFile);
+
+    if (!fs.existsSync(outFile) || fs.statSync(outFile).size < MIN_VALID_FILE_BYTES) {
+      log('recording too short or missing — skipping upload (likely a brief false-positive live reading).');
+      status = await fetchLiveStatus().catch(() => null);
+      continue;
+    }
+
+    const sizeBytes = fs.statSync(outFile).size;
+    const baseTag = `rec-${dates.iso}`;
+    const tag = uniqueTag(part === 1 ? baseTag : `${baseTag}-part${part}`);
+    const title = `${dates.english} · ${dates.hijri || ''} · ${dates.bengali}` + (part > 1 ? ` (part ${part})` : '');
+
+    log('creating GitHub Release and uploading the recording...');
+    sh(`gh release create "${tag}" "${outFile}" --title "${title.replace(/"/g, '\\"')}" --notes "Automated recording of the live broadcast."`);
+
+    const assetUrl = shOut(`gh release view "${tag}" --json assets -q '.assets[0].url'`);
+
+    ensureArchiveDataBranch();
+    const manifest = readManifestFromBranch();
+    manifest.push({
+      iso: dates.iso,
+      english: dates.english,
+      hijri: dates.hijri,
+      bengali: dates.bengali,
+      tag,
+      assetUrl,
+      sizeBytes,
+      part,
+      recordedAt: startedAt.toISOString()
+    });
+    writeManifestToBranch(manifest, `Add recording ${dates.iso}${part > 1 ? ` part ${part}` : ''}`);
+
+    if (!hitSegmentCap) {
+      // recordStream stopped because live-status reported offline — this
+      // was the real end of the broadcast, not just a segment checkpoint.
+      break;
+    }
+
+    part++;
+    status = await fetchLiveStatus().catch(() => null);
   }
-
-  const sizeBytes = fs.statSync(outFile).size;
-  const tag = `rec-${dates.iso}`;
-  const title = `${dates.english} · ${dates.hijri || ''} · ${dates.bengali}`;
-
-  log('creating GitHub Release and uploading the recording...');
-  sh(`gh release create "${tag}" "${outFile}" --title "${title.replace(/"/g, '\\"')}" --notes "Automated recording of the live broadcast."`);
-
-  const assetUrl = shOut(`gh release view "${tag}" --json assets -q '.assets[0].url'`);
-
-  ensureArchiveDataBranch();
-  const manifest = readManifestFromBranch();
-  manifest.push({
-    iso: dates.iso,
-    english: dates.english,
-    hijri: dates.hijri,
-    bengali: dates.bengali,
-    tag,
-    assetUrl,
-    sizeBytes,
-    recordedAt: startedAt.toISOString()
-  });
-  writeManifestToBranch(manifest, `Add recording ${dates.iso}`);
 
   log('done.');
 }
@@ -281,4 +332,3 @@ main().catch((err) => {
   console.error('[record-live] fatal error:', err);
   process.exit(1);
 });
-      
