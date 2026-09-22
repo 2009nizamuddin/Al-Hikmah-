@@ -143,6 +143,14 @@
 
   const listEl = document.getElementById('list');
 
+  const BANGLA_WEEKDAYS = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+  function weekdayBn(iso) {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-').map(Number);
+    if (!y || !m || !d) return '';
+    return BANGLA_WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  }
+
   function formatSize(bytes) {
     if (!bytes) return '';
     const mb = bytes / (1024 * 1024);
@@ -177,7 +185,7 @@
     listEl.innerHTML = sorted.map(rec => `
       <div class="rec-card">
         <div class="rec-dates">
-          <div class="en">${escapeHtml(rec.english || rec.iso)}</div>
+          <div class="en">${escapeHtml(rec.english || rec.iso)}${rec.iso ? ` · ${weekdayBn(rec.iso)}` : ''}</div>
           ${rec.hijri ? `<div class="hijri">${escapeHtml(rec.hijri)}</div>` : ''}
           ${rec.bengali ? `<div class="bn">${escapeHtml(rec.bengali)}</div>` : ''}
         </div>
