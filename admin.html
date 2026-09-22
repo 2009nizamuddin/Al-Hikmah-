@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>আর্কাইভ এডিট — আল হিকমাহ লাইভ</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --night:        #0D1226;
+    --night-2:      #161C38;
+    --brass:        #C08B3E;
+    --brass-soft:   #E3B872;
+    --linen:        #F3EEE4;
+    --ink:          #ECE8DC;
+    --muted:        #8B92B4;
+    --muted-2:      #5C6288;
+    --hairline:     rgba(227, 184, 114, 0.16);
+    --ok:           #6FBF73;
+    --err:          #E2574C;
+
+    --font-display: 'Noto Serif Bengali', serif;
+    --font-body:    'Hind Siliguri', sans-serif;
+    --max-width: 640px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--max-width); margin: 0 auto; padding: 0 20px; }
+
+  header { padding: 36px 0 20px; text-align: center; }
+  header h1 {
+    font-family: var(--font-display);
+    color: var(--brass-soft);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+  header p { color: var(--muted); font-size: 0.85rem; margin: 0; }
+
+  main { padding: 6px 0 40px; }
+
+  .gate {
+    background: var(--night-2);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .gate label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+  .gate input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    background: var(--night);
+    color: var(--ink);
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  button {
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--night);
+    background: var(--brass-soft);
+    border: none;
+    border-radius: 999px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; }
+  .state-note { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 40px 10px; }
+
+  .rec-card {
+    background: var(--night-2);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .rec-card .weekday {
+    font-size: 0.78rem;
+    color: var(--brass-soft);
+    margin-bottom: 10px;
+  }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 0.76rem; color: var(--muted); margin-bottom: 4px; }
+  .field input {
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--night);
+    color: var(--ink);
+    font-size: 0.92rem;
+  }
+  .row-actions { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .msg { font-size: 0.8rem; }
+  .msg.ok { color: var(--ok); }
+  .msg.err { color: var(--err); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>আর্কাইভ তারিখ এডিট</h1>
+    <p>শুধুমাত্র এডমিনের জন্য</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <div id="gate" class="gate">
+      <label for="pw">পাসওয়ার্ড দিন</label>
+      <input type="password" id="pw" autocomplete="off" />
+      <button id="unlockBtn">আনলক করুন</button>
+      <p id="gateMsg" class="msg" style="margin-top:10px;"></p>
+    </div>
+
+    <div id="list" style="display:none;"></div>
+
+  </div>
+</main>
+
+<script>
+  const REPO_OWNER = '2009nizamuddin';
+  const REPO_NAME = 'Al-Hikmah-';
+  const MANIFEST_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/archive-data/manifest.json`;
+  const API_URL = '/.netlify/functions/admin-manifest';
+
+  const BANGLA_WEEKDAYS = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+  function weekdayBn(iso) {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-').map(Number);
+    if (!y || !m || !d) return '';
+    return BANGLA_WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  }
+
+  let password = null;
+
+  const gateEl = document.getElementById('gate');
+  const gateMsgEl = document.getElementById('gateMsg');
+  const listEl = document.getElementById('list');
+  const pwInput = document.getElementById('pw');
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  document.getElementById('unlockBtn').addEventListener('click', async () => {
+    const candidate = pwInput.value;
+    if (!candidate) return;
+    gateMsgEl.textContent = 'চেক হচ্ছে...';
+    gateMsgEl.className = 'msg';
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: candidate, action: 'verify' })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        gateMsgEl.textContent = data.error || 'ভুল পাসওয়ার্ড';
+        gateMsgEl.className = 'msg err';
+        return;
+      }
+      password = candidate;
+      gateEl.style.display = 'none';
+      listEl.style.display = 'block';
+      loadList();
+    } catch (e) {
+      gateMsgEl.textContent = 'সংযোগে সমস্যা হয়েছে, আবার চেষ্টা করুন।';
+      gateMsgEl.className = 'msg err';
+    }
+  });
+
+  async function loadList() {
+    listEl.innerHTML = '<p class="state-note">লোড হচ্ছে...</p>';
+    let manifest;
+    try {
+      const res = await fetch(MANIFEST_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      manifest = await res.json();
+    } catch (e) {
+      listEl.innerHTML = '<p class="state-note">আর্কাইভ লোড করা যাচ্ছে না।</p>';
+      return;
+    }
+
+    if (!Array.isArray(manifest) || manifest.length === 0) {
+      listEl.innerHTML = '<p class="state-note">এখনো কোনো রেকর্ডিং নেই।</p>';
+      return;
+    }
+
+    const sorted = [...manifest].sort((a, b) => (b.iso || '').localeCompare(a.iso || ''));
+
+    listEl.innerHTML = sorted.map((rec, i) => `
+      <div class="rec-card" data-tag="${escapeHtml(rec.tag)}">
+        <div class="weekday" data-role="weekday">${weekdayBn(rec.iso)}</div>
+        <div class="field">
+          <label>তারিখ (ইংরেজি ক্যালেন্ডার, YYYY-MM-DD)</label>
+          <input type="date" data-field="iso" value="${escapeHtml(rec.iso || '')}" />
+        </div>
+        <div class="field">
+          <label>ইংরেজি তারিখ (প্রদর্শিত লেখা)</label>
+          <input type="text" data-field="english" value="${escapeHtml(rec.english || '')}" />
+        </div>
+        <div class="field">
+          <label>হিজরি তারিখ</label>
+          <input type="text" data-field="hijri" value="${escapeHtml(rec.hijri || '')}" />
+        </div>
+        <div class="field">
+          <label>বাংলা তারিখ</label>
+          <input type="text" data-field="bengali" value="${escapeHtml(rec.bengali || '')}" />
+        </div>
+        <div class="row-actions">
+          <button data-role="save">সংরক্ষণ করুন</button>
+          <span class="msg" data-role="msg"></span>
+        </div>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.rec-card').forEach(card => {
+      const isoInput = card.querySelector('[data-field="iso"]');
+      const weekdayEl = card.querySelector('[data-role="weekday"]');
+      isoInput.addEventListener('input', () => {
+        weekdayEl.textContent = weekdayBn(isoInput.value);
+      });
+
+      card.querySelector('[data-role="save"]').addEventListener('click', async () => {
+        const tag = card.dataset.tag;
+        const entry = {
+          iso: isoInput.value,
+          english: card.querySelector('[data-field="english"]').value,
+          hijri: card.querySelector('[data-field="hijri"]').value,
+          bengali: card.querySelector('[data-field="bengali"]').value
+        };
+        const msgEl = card.querySelector('[data-role="msg"]');
+        const btn = card.querySelector('[data-role="save"]');
+        btn.disabled = true;
+        msgEl.textContent = 'সংরক্ষণ হচ্ছে...';
+        msgEl.className = 'msg';
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password, action: 'update', tag, entry })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) throw new Error(data.error || 'সংরক্ষণ ব্যর্থ হয়েছে');
+          msgEl.textContent = 'সংরক্ষণ হয়েছে ✓ (আর্কাইভ পাতায় দেখা যেতে কয়েক মিনিট লাগতে পারে)';
+          msgEl.className = 'msg ok';
+        } catch (e) {
+          msgEl.textContent = e.message;
+          msgEl.className = 'msg err';
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
