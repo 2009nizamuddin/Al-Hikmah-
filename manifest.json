@@ -97,5 +97,16 @@
     "sizeBytes": 21645086,
     "part": 1,
     "recordedAt": "2026-09-24T14:59:51.650Z"
+  },
+  {
+    "iso": "2026-09-24",
+    "english": "24 September 2026",
+    "hijri": "١٣ ربيع الآخر ١٤٤٨ هـ",
+    "bengali": "৯ আশ্বিন ১৪৩৩ বঙ্গাব্দ",
+    "tag": "rec-2026-09-24-3",
+    "assetUrl": "https://github.com/2009nizamuddin/Al-Hikmah-/releases/download/rec-2026-09-24-3/2026-09-24.mp3",
+    "sizeBytes": 31496128,
+    "part": 1,
+    "recordedAt": "2026-09-24T17:35:24.322Z"
   }
 ]
