@@ -1,8 +1,11 @@
 'use strict';
 
 /**
- * Password-protected endpoint for fixing a recording's dates in
- * manifest.json on the archive-data branch. Called only from admin.html.
+ * Password-protected endpoint for fixing a recording's details (dates,
+ * start/end time, title, Jumuah label) in manifest.json on the
+ * archive-data branch, and for saving the Hijri-date offset in
+ * settings.json so later recordings count from the corrected date.
+ * Called only from admin.html.
  *
  * Two secrets must be set as Netlify environment variables (Site
  * settings -> Environment variables) — never put these in any file:
@@ -70,6 +73,20 @@ exports.handler = async (event) => {
     'User-Agent': 'al-hikmah-admin'
   };
 
+  async function putFile(filePath, data, sha, message) {
+    const content = Buffer.from(JSON.stringify(data, null, 2) + '\n', 'utf8').toString('base64');
+    const payload = { message, content, branch: BRANCH };
+    if (sha) payload.sha = sha;
+    const putRes = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`,
+      { method: 'PUT', headers: { ...ghHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+    );
+    if (!putRes.ok) {
+      const detail = await putRes.text();
+      throw new Error(`commit failed: HTTP ${putRes.status} ${detail}`);
+    }
+  }
+
   try {
     const getRes = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/manifest.json?ref=${BRANCH}`,
@@ -82,31 +99,47 @@ exports.handler = async (event) => {
     const idx = manifest.findIndex((r) => r.tag === tag);
     if (idx === -1) throw new Error('এই রেকর্ডিং এখন আর manifest-এ নেই (tag মিলছে না)');
 
-    // Only the display date fields are editable here — tag, assetUrl,
-    // sizeBytes etc. are left untouched so the audio link never breaks.
+    // Only display fields are editable here — tag, assetUrl, sizeBytes etc.
+    // are left untouched so the audio link never breaks.
+    const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
     if (typeof entry.iso === 'string' && entry.iso) manifest[idx].iso = entry.iso;
     if (typeof entry.english === 'string') manifest[idx].english = entry.english;
     if (typeof entry.hijri === 'string') manifest[idx].hijri = entry.hijri;
     if (typeof entry.bengali === 'string') manifest[idx].bengali = entry.bengali;
+    if (typeof entry.startTime === 'string') {
+      if (entry.startTime !== '' && !TIME_RE.test(entry.startTime)) throw new Error('শুরুর সময় ঠিক নয়');
+      manifest[idx].startTime = entry.startTime;
+    }
+    if (typeof entry.endTime === 'string') {
+      if (entry.endTime !== '' && !TIME_RE.test(entry.endTime)) throw new Error('শেষের সময় ঠিক নয়');
+      manifest[idx].endTime = entry.endTime;
+    }
+    if (typeof entry.title === 'string') manifest[idx].title = entry.title.slice(0, 120);
+    if (entry.kind === 'regular' || entry.kind === 'jumuah') manifest[idx].kind = entry.kind;
 
-    const newContent = Buffer.from(JSON.stringify(manifest, null, 2) + '\n', 'utf8').toString('base64');
+    await putFile('manifest.json', manifest, getData.sha, `Admin edit: fix details for ${tag}`);
 
-    const putRes = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/manifest.json`,
-      {
-        method: 'PUT',
-        headers: { ...ghHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: `Admin edit: fix dates for ${tag}`,
-          content: newContent,
-          sha: getData.sha,
-          branch: BRANCH
-        })
+    // Optional: remember a Hijri-date correction so recordings made from
+    // now on are counted from the corrected date.
+    if (entry.hijriOffsetDays !== undefined && entry.hijriOffsetDays !== null) {
+      const off = Number(entry.hijriOffsetDays);
+      if (!Number.isInteger(off) || off < -5 || off > 5) throw new Error('হিজরি সমন্বয়ের মান ঠিক নয়');
+      let settings = {};
+      let settingsSha;
+      const sRes = await fetch(
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/settings.json?ref=${BRANCH}`,
+        { headers: ghHeaders }
+      );
+      if (sRes.ok) {
+        const sData = await sRes.json();
+        settingsSha = sData.sha;
+        try { settings = JSON.parse(Buffer.from(sData.content, 'base64').toString('utf8')); } catch (e) { settings = {}; }
+      } else if (sRes.status !== 404) {
+        throw new Error(`settings fetch failed: HTTP ${sRes.status}`);
       }
-    );
-    if (!putRes.ok) {
-      const detail = await putRes.text();
-      throw new Error(`commit failed: HTTP ${putRes.status} ${detail}`);
+      settings.hijriOffsetDays = off;
+      settings.updatedAt = new Date().toISOString();
+      await putFile('settings.json', settings, settingsSha, `Admin edit: Hijri offset ${off}`);
     }
 
     return json(200, { ok: true });
@@ -114,4 +147,3 @@ exports.handler = async (event) => {
     return json(502, { error: e.message });
   }
 };
-
