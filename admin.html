@@ -106,6 +106,20 @@
     color: var(--ink);
     font-size: 0.92rem;
   }
+  .field select {
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--night);
+    color: var(--ink);
+    font-size: 0.92rem;
+  }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .check { display: flex; align-items: flex-start; gap: 8px; font-size: 0.78rem; color: var(--muted); margin: 6px 0 10px; }
+  .check input { margin-top: 4px; }
+  .hint { font-size: 0.72rem; color: var(--muted-2); margin-top: 4px; }
+  .time-preview { font-size: 0.8rem; color: var(--brass-soft); margin-top: 2px; }
   .row-actions { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
   .msg { font-size: 0.8rem; }
   .msg.ok { color: var(--ok); }
@@ -190,6 +204,74 @@
     }
   });
 
+  /* ---------- date helpers (same rules as scripts/record-live.js) ---------- */
+  const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  const bn = (v) => String(v).replace(/\d/g, (d) => BN_DIGITS[d]);
+  const BANGLA_MONTHS = ['বৈশাখ', 'জ্যৈষ্ঠ', 'আষাঢ়', 'শ্রাবণ', 'ভাদ্র', 'আশ্বিন', 'কার্তিক', 'অগ্রহায়ণ', 'পৌষ', 'মাঘ', 'ফাল্গুন', 'চৈত্র'];
+  const isLeap = (y) => (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+  const JUMUAH_TITLE = 'জুমুয়াবারের আলোচনা';
+
+  function englishFromIso(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+      .format(new Date(Date.UTC(y, m - 1, d)));
+  }
+  function hijriFromIso(iso, off) {
+    const [y, m, d] = iso.split('-').map(Number);
+    try {
+      const date = new Date(Date.UTC(y, m - 1, d, 6, 0, 0) + off * 86400000); // noon, Bangladesh time
+      return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Dhaka' }).format(date);
+    } catch (e) { return ''; }
+  }
+  function bengaliFromIso(iso) {
+    const [gY, gM, gD] = iso.split('-').map(Number);
+    const onOrAfter = gM > 4 || (gM === 4 && gD >= 14);
+    const bYear = onOrAfter ? gY - 593 : gY - 594;
+    const anchorY = bYear + 593;
+    let offset = Math.round((Date.UTC(gY, gM - 1, gD) - Date.UTC(anchorY, 3, 14)) / 86400000);
+    if (offset < 0) offset += 365;
+    const lens = [31, 31, 31, 31, 31, 30, 30, 30, 30, 30, isLeap(anchorY + 1) ? 31 : 30, 30];
+    let mi = 0, rem = offset;
+    while (mi < lens.length - 1 && rem >= lens[mi]) { rem -= lens[mi]; mi++; }
+    return `${bn(rem + 1)} ${BANGLA_MONTHS[mi]} ${bn(bYear)} বঙ্গাব্দ`;
+  }
+  function guessOffset(rec) {
+    if (!rec.iso || !rec.hijri) return 'x';
+    for (let off = -3; off <= 3; off++) if (hijriFromIso(rec.iso, off) === rec.hijri) return String(off);
+    return 'x';
+  }
+
+  /* ---------- time helpers (same wording as archive.html) ---------- */
+  function periodBn(h) {
+    if (h >= 4 && h < 6) return 'ভোর';
+    if (h >= 6 && h < 12) return 'সকাল';
+    if (h >= 12 && h < 16) return 'দুপুর';
+    if (h >= 16 && h < 18) return 'বিকাল';
+    if (h >= 18 && h < 20) return 'সন্ধ্যা';
+    return 'রাত';
+  }
+  function parseHM(v) { const m = /^(\d{1,2}):(\d{2})$/.exec(v || ''); return m ? { h: +m[1], m: +m[2] } : null; }
+  function fmtTime(t) { const h12 = t.h % 12 === 0 ? 12 : t.h % 12; return { period: periodBn(t.h), text: `${bn(h12)}:${bn(String(t.m).padStart(2, '0'))}` }; }
+  function timeRangeBn(sv, ev) {
+    const a = parseHM(sv), b = parseHM(ev);
+    if (!a) return '';
+    const fa = fmtTime(a);
+    if (!b) return `${fa.period} ${fa.text} থেকে`;
+    const fb = fmtTime(b);
+    return `${fa.period} ${fa.text} থেকে ${fa.period === fb.period ? fb.text : fb.period + ' ' + fb.text} পর্যন্ত`;
+  }
+  function hmFromIso(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
+  }
+
+  function offsetOptions(selected) {
+    const opts = [['0', '০ — স্বয়ংক্রিয় হিসাব'], ['1', '+১ দিন (এক দিন এগিয়ে)'], ['2', '+২ দিন'], ['-1', '−১ দিন (এক দিন পিছিয়ে)'], ['-2', '−২ দিন'], ['x', 'নিজে লেখা (কাস্টম)']];
+    return opts.map(([v, l]) => `<option value="${v}" ${v === selected ? 'selected' : ''}>${l}</option>`).join('');
+  }
+
   async function loadList() {
     listEl.innerHTML = '<p class="state-note">লোড হচ্ছে...</p>';
     let manifest;
@@ -207,51 +289,129 @@
       return;
     }
 
-    const sorted = [...manifest].sort((a, b) => (b.iso || '').localeCompare(a.iso || ''));
+    const sorted = [...manifest].sort((a, b) => (b.iso || '').localeCompare(a.iso || '') || (a.recordedAt || '').localeCompare(b.recordedAt || ''));
 
-    listEl.innerHTML = sorted.map((rec, i) => `
-      <div class="rec-card" data-tag="${escapeHtml(rec.tag)}">
+    listEl.innerHTML = sorted.map((rec) => {
+      const start = rec.startTime || hmFromIso(rec.recordedAt);
+      const end = rec.endTime || hmFromIso(rec.endedAt);
+      const kind = rec.kind === 'jumuah' ? 'jumuah' : 'regular';
+      return `
+      <div class="rec-card" data-tag="${escapeHtml(rec.tag)}" data-orig-offset="${guessOffset(rec)}">
         <div class="weekday" data-role="weekday">${weekdayBn(rec.iso)}</div>
+
+        <div class="two">
+          <div class="field">
+            <label>ধরন</label>
+            <select data-field="kind">
+              <option value="regular" ${kind === 'regular' ? 'selected' : ''}>সাধারণ</option>
+              <option value="jumuah" ${kind === 'jumuah' ? 'selected' : ''}>জুমুয়ার আলোচনা</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>শিরোনাম (ঐচ্ছিক)</label>
+            <input type="text" data-field="title" value="${escapeHtml(rec.title || '')}" />
+          </div>
+        </div>
+
         <div class="field">
-          <label>তারিখ (ইংরেজি ক্যালেন্ডার, YYYY-MM-DD)</label>
+          <label>তারিখ (ইংরেজি ক্যালেন্ডার)</label>
           <input type="date" data-field="iso" value="${escapeHtml(rec.iso || '')}" />
+          <div class="hint">তারিখ বদলালে নিচের তিন তারিখ নিজে থেকে নতুন করে বসে যাবে।</div>
         </div>
         <div class="field">
           <label>ইংরেজি তারিখ (প্রদর্শিত লেখা)</label>
           <input type="text" data-field="english" value="${escapeHtml(rec.english || '')}" />
         </div>
+
         <div class="field">
-          <label>হিজরি তারিখ</label>
+          <label>হিজরি তারিখ — হিসাবের সমন্বয়</label>
+          <select data-field="offset">${offsetOptions(guessOffset(rec))}</select>
+        </div>
+        <div class="check" data-role="forwardWrap" style="display:none;">
+          <input type="checkbox" data-field="forward" checked />
+          <span>এই সংশোধন থেকে পরবর্তী নতুন রেকর্ডিংগুলোর হিজরি তারিখও গণনা হবে (আগের রেকর্ডিং বদলাবে না)</span>
+        </div>
+        <div class="field">
+          <label>হিজরি তারিখ (প্রদর্শিত লেখা)</label>
           <input type="text" data-field="hijri" value="${escapeHtml(rec.hijri || '')}" />
         </div>
         <div class="field">
           <label>বাংলা তারিখ</label>
           <input type="text" data-field="bengali" value="${escapeHtml(rec.bengali || '')}" />
         </div>
+
+        <div class="two">
+          <div class="field">
+            <label>শুরুর সময়</label>
+            <input type="time" data-field="startTime" value="${escapeHtml(start)}" />
+          </div>
+          <div class="field">
+            <label>শেষের সময়</label>
+            <input type="time" data-field="endTime" value="${escapeHtml(end)}" />
+          </div>
+        </div>
+        <div class="time-preview" data-role="timePreview">${timeRangeBn(start, end)}</div>
+
         <div class="row-actions">
           <button data-role="save">সংরক্ষণ করুন</button>
           <span class="msg" data-role="msg"></span>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
-    listEl.querySelectorAll('.rec-card').forEach(card => {
-      const isoInput = card.querySelector('[data-field="iso"]');
-      const weekdayEl = card.querySelector('[data-role="weekday"]');
-      isoInput.addEventListener('input', () => {
-        weekdayEl.textContent = weekdayBn(isoInput.value);
+    listEl.querySelectorAll('.rec-card').forEach((card) => {
+      const f = (name) => card.querySelector(`[data-field="${name}"]`);
+      const role = (name) => card.querySelector(`[data-role="${name}"]`);
+      const origOffset = card.dataset.origOffset;
+      let offsetChanged = false;
+
+      const refreshHijri = () => {
+        const sel = f('offset').value;
+        if (sel === 'x' || !f('iso').value) return;
+        f('hijri').value = hijriFromIso(f('iso').value, Number(sel));
+      };
+      const refreshTime = () => { role('timePreview').textContent = timeRangeBn(f('startTime').value, f('endTime').value); };
+
+      f('iso').addEventListener('input', () => {
+        const iso = f('iso').value;
+        role('weekday').textContent = weekdayBn(iso);
+        if (!iso) return;
+        f('english').value = englishFromIso(iso);
+        f('bengali').value = bengaliFromIso(iso);
+        if (f('offset').value === 'x') f('offset').value = '0';
+        refreshHijri();
       });
 
-      card.querySelector('[data-role="save"]').addEventListener('click', async () => {
-        const tag = card.dataset.tag;
+      f('offset').addEventListener('change', () => {
+        offsetChanged = f('offset').value !== origOffset;
+        role('forwardWrap').style.display = (offsetChanged && f('offset').value !== 'x') ? 'flex' : 'none';
+        refreshHijri();
+      });
+
+      f('kind').addEventListener('change', () => {
+        if (f('kind').value === 'jumuah' && !f('title').value) f('title').value = JUMUAH_TITLE;
+        if (f('kind').value === 'regular' && f('title').value === JUMUAH_TITLE) f('title').value = '';
+      });
+
+      f('startTime').addEventListener('input', refreshTime);
+      f('endTime').addEventListener('input', refreshTime);
+
+      role('save').addEventListener('click', async () => {
         const entry = {
-          iso: isoInput.value,
-          english: card.querySelector('[data-field="english"]').value,
-          hijri: card.querySelector('[data-field="hijri"]').value,
-          bengali: card.querySelector('[data-field="bengali"]').value
+          iso: f('iso').value,
+          english: f('english').value,
+          hijri: f('hijri').value,
+          bengali: f('bengali').value,
+          startTime: f('startTime').value,
+          endTime: f('endTime').value,
+          title: f('title').value.trim(),
+          kind: f('kind').value
         };
-        const msgEl = card.querySelector('[data-role="msg"]');
-        const btn = card.querySelector('[data-role="save"]');
+        if (offsetChanged && f('offset').value !== 'x' && f('forward').checked) {
+          entry.hijriOffsetDays = Number(f('offset').value);
+        }
+        const msgEl = role('msg');
+        const btn = role('save');
         btn.disabled = true;
         msgEl.textContent = 'সংরক্ষণ হচ্ছে...';
         msgEl.className = 'msg';
@@ -259,11 +419,13 @@
           const res = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password, action: 'update', tag, entry })
+            body: JSON.stringify({ password, action: 'update', tag: card.dataset.tag, entry })
           });
           const data = await res.json();
           if (!res.ok || !data.ok) throw new Error(data.error || 'সংরক্ষণ ব্যর্থ হয়েছে');
-          msgEl.textContent = 'সংরক্ষণ হয়েছে ✓ (আর্কাইভ পাতায় দেখা যেতে কয়েক মিনিট লাগতে পারে)';
+          msgEl.textContent = entry.hijriOffsetDays !== undefined
+            ? 'সংরক্ষণ হয়েছে ✓ — পরবর্তী রেকর্ডিং এই হিজরি তারিখ থেকে গণনা হবে'
+            : 'সংরক্ষণ হয়েছে ✓ (আর্কাইভ পাতায় দেখা যেতে কয়েক মিনিট লাগতে পারে)';
           msgEl.className = 'msg ok';
         } catch (e) {
           msgEl.textContent = e.message;
