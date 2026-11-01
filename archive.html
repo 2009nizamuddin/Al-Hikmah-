@@ -85,6 +85,18 @@
   }
   .rec-dates .bn { color: var(--muted); font-size: 0.82rem; margin-top: 4px; }
 
+  .rec-label { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .badge {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--night);
+    background: var(--brass-soft);
+    padding: 2px 11px;
+    border-radius: 999px;
+  }
+  .badge.part { background: transparent; color: var(--brass-soft); border: 1px solid var(--hairline); }
+  .rec-dates .time { color: var(--brass-soft); font-size: 0.86rem; margin-top: 6px; }
+
   audio { width: 100%; margin: 4px 0 14px; }
   audio::-webkit-media-controls-panel { background-color: var(--night); }
 
@@ -151,6 +163,45 @@
     return BANGLA_WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
   }
 
+  const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  const bn = (v) => String(v).replace(/\d/g, (d) => BN_DIGITS[d]);
+
+  function periodBn(h) {
+    if (h >= 4 && h < 6) return 'ভোর';
+    if (h >= 6 && h < 12) return 'সকাল';
+    if (h >= 12 && h < 16) return 'দুপুর';
+    if (h >= 16 && h < 18) return 'বিকাল';
+    if (h >= 18 && h < 20) return 'সন্ধ্যা';
+    return 'রাত';
+  }
+  function parseHM(s) {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(s || '');
+    return m ? { h: +m[1], m: +m[2] } : null;
+  }
+  function fmtTime(t) {
+    const h12 = t.h % 12 === 0 ? 12 : t.h % 12;
+    return { period: periodBn(t.h), text: `${bn(h12)}:${bn(String(t.m).padStart(2, '0'))}` };
+  }
+  // "দুপুর ১২:০০ থেকে ৩:০০ পর্যন্ত"
+  function timeRangeBn(startHM, endHM) {
+    const a = parseHM(startHM), b = parseHM(endHM);
+    if (!a) return '';
+    const fa = fmtTime(a);
+    if (!b) return `${fa.period} ${fa.text} থেকে`;
+    const fb = fmtTime(b);
+    const second = fa.period === fb.period ? fb.text : `${fb.period} ${fb.text}`;
+    return `${fa.period} ${fa.text} থেকে ${second} পর্যন্ত`;
+  }
+  // Older recordings have no startTime/endTime — derive from their timestamps (Bangladesh time).
+  function hmFromIso(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
+  }
+  const startOf = (r) => r.startTime || hmFromIso(r.recordedAt);
+  const endOf = (r) => r.endTime || hmFromIso(r.endedAt);
+
   function formatSize(bytes) {
     if (!bytes) return '';
     const mb = bytes / (1024 * 1024);
@@ -180,22 +231,41 @@
       return;
     }
 
-    const sorted = [...manifest].sort((a, b) => (b.iso || '').localeCompare(a.iso || ''));
+    // Newest day first; within one day, earliest part first (পর্ব ১, ২, ৩...).
+    const sorted = [...manifest].sort((a, b) => {
+      const byDay = (b.iso || '').localeCompare(a.iso || '');
+      if (byDay !== 0) return byDay;
+      return (startOf(a) || '').localeCompare(startOf(b) || '');
+    });
 
-    listEl.innerHTML = sorted.map(rec => `
+    const perDay = {};
+    manifest.forEach((r) => { perDay[r.iso] = (perDay[r.iso] || 0) + 1; });
+    const seen = {};
+
+    listEl.innerHTML = sorted.map((rec) => {
+      seen[rec.iso] = (seen[rec.iso] || 0) + 1;
+      const label = rec.title || (rec.kind === 'jumuah' ? 'জুমুয়াবারের আলোচনা' : '');
+      const partBadge = perDay[rec.iso] > 1 ? `পর্ব ${bn(seen[rec.iso])}` : '';
+      const labelHtml = (label || partBadge)
+        ? `<div class="rec-label">${label ? `<span class="badge">${escapeHtml(label)}</span>` : ''}${partBadge ? `<span class="badge part">${partBadge}</span>` : ''}</div>`
+        : '';
+      const range = timeRangeBn(startOf(rec), endOf(rec));
+      return `
       <div class="rec-card">
+        ${labelHtml}
         <div class="rec-dates">
           <div class="en">${escapeHtml(rec.english || rec.iso)}${rec.iso ? ` · ${weekdayBn(rec.iso)}` : ''}</div>
           ${rec.hijri ? `<div class="hijri">${escapeHtml(rec.hijri)}</div>` : ''}
           ${rec.bengali ? `<div class="bn">${escapeHtml(rec.bengali)}</div>` : ''}
+          ${range ? `<div class="time">${range}</div>` : ''}
         </div>
         <audio controls preload="none" src="${escapeHtml(rec.assetUrl)}"></audio>
         <div class="rec-actions">
           <a class="dl-link" href="${escapeHtml(rec.assetUrl)}" download>ডাউনলোড</a>
           <span class="rec-size">${formatSize(rec.sizeBytes)}</span>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   load();
