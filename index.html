@@ -516,7 +516,7 @@
 <main>
   <div class="wrap">
 
-    <div class="card">
+    <div class="card" id="playerCard">
       <div class="status-row">
         <span id="statusEq" class="eq checking"><span></span><span></span><span></span><span></span></span>
         <span id="statusLabel" class="status-label">যাচাই করা হচ্ছে...</span>
@@ -840,6 +840,20 @@ volumeSlider.addEventListener('input', (e) => {
     volIcon.innerHTML = ICON_VOL;
   }
   applyVolume();
+});
+
+/* ============================================================
+   On load, glide down past the long header to the player card
+   ============================================================ */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    // Don't fight the reader: skip if they already scrolled, or opened a #link.
+    if (window.scrollY > 40 || location.hash) return;
+    const card = document.getElementById('playerCard');
+    if (!card) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    card.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+  }, 700);
 });
 </script>
 
