@@ -750,12 +750,16 @@
   {
     "iso": "2026-10-31",
     "english": "31 October 2026",
-    "hijri": "٢١ جمادى الأولى ١٤٤٨ هـ",
+    "hijri": "١٩ جمادى الأولى ١٤٤٨ هـ",
     "bengali": "১৬ কার্তিক ১৪৩৩ বঙ্গাব্দ",
     "tag": "rec-2026-10-31",
     "assetUrl": "https://github.com/2009nizamuddin/Al-Hikmah-/releases/download/rec-2026-10-31/2026-10-31.mp3",
     "sizeBytes": 36000547,
     "part": 1,
-    "recordedAt": "2026-10-31T14:50:39.753Z"
+    "recordedAt": "2026-10-31T14:50:39.753Z",
+    "startTime": "20:50",
+    "endTime": "",
+    "title": "",
+    "kind": "regular"
   }
 ]
