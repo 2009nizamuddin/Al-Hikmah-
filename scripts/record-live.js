@@ -41,7 +41,7 @@ const MIN_VALID_FILE_BYTES = 150 * 1024; // discard obviously-too-short false-po
 const NORMAL_GRACE_MS = 5 * 60 * 1000; // normal days: end only after this long continuously offline
 const JUMUAH_GRACE_MS = 30 * 60 * 1000; // Jumuah: much more patient — no stopping for short silences
 const JUMUAH_END_HOUR = 15; // 3:00 PM Bangladesh time
-const JUMUAH_TITLE = 'জুমুয়াবারের নছীহত মুবারক';
+const JUMUAH_TITLE = 'জুমুয়াবারের আলোচনা';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -494,4 +494,5 @@ async function main() {
 
 main().catch((err) => {
   console.error('[record-live] fatal error:', err);
- 
+  process.exit(1);
+});
