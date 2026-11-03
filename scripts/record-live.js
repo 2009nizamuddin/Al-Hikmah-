@@ -231,7 +231,7 @@ function recordPiece(streamUrl, outFile, seconds, useReconnect, monitor) {
     if (useReconnect) {
       args.push('-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '30', '-rw_timeout', '20000000');
     }
-    args.push('-i', streamUrl, '-c', 'copy', '-write_xing', '0', '-t', String(Math.ceil(seconds)), outFile);
+    args.push('-i', streamUrl, '-c', 'copy', '-write_xing', '0', '-t', String(Math.ceil(seconds)), '-f', 'mp3', outFile);
 
     const ff = spawn('ffmpeg', args, { stdio: 'inherit' });
     let killedForOffline = false;
@@ -275,7 +275,7 @@ async function recordSegment(streamUrl, outFile, { maxSeconds, graceMs }) {
     const remaining = maxSeconds - (Date.now() - startedMs) / 1000;
     if (remaining < 5) { reason = 'cap'; break; }
 
-    const piece = `${outFile}.piece${pieces.length}`;
+    const piece = `${outFile}.piece${pieces.length}.mp3`; // must end in .mp3 so ffmpeg knows the format
     const pieceStartMs = Date.now();
     const res = await recordPiece(streamUrl, piece, remaining, useReconnect, monitor);
     if (fs.existsSync(piece) && fs.statSync(piece).size > 0) pieces.push(piece);
