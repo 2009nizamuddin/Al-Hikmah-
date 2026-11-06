@@ -12,8 +12,8 @@
  *      offline for a grace period (5 minutes normally, 30 minutes during
  *      Jumuah). Pieces recorded around a hiccup are joined into one file.
  *   3. Normal days: recorded in ~2-hour parts (part 1, part 2, ...).
- *      Jumuah (Friday, Bangladesh time): any recording that starts before
- *      3:00 PM runs as ONE unbroken file until 3:00 PM, labelled
+ *      Jumuah (Friday, Bangladesh time): any recording that starts between
+ *      10:00 AM and 3:00 PM runs as ONE unbroken file until 3:00 PM, labelled
  *      "জুমুয়াবারের আলোচনা". If the broadcast is still live after 3:00 PM
  *      the rest becomes a separate normal part.
  *   4. Each finished file is uploaded as its own GitHub Release asset and
@@ -40,6 +40,7 @@ const POLL_INTERVAL_MS = 60 * 1000; // how often to re-check live-status while r
 const MIN_VALID_FILE_BYTES = 150 * 1024; // discard obviously-too-short false-positive recordings
 const NORMAL_GRACE_MS = 5 * 60 * 1000; // normal days: end only after this long continuously offline
 const JUMUAH_GRACE_MS = 30 * 60 * 1000; // Jumuah: much more patient — no stopping for short silences
+const JUMUAH_START_HOUR = 10; // Jumuah mode applies only to recordings that START between 10:00 AM and 3:00 PM on Friday
 const JUMUAH_END_HOUR = 15; // 3:00 PM Bangladesh time
 const JUMUAH_TITLE = 'জুমুয়াবারের আলোচনা';
 
@@ -145,11 +146,13 @@ function hhmmDhaka(d) {
   return `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
 }
 
-// If `now` is a Friday (Bangladesh time) before 3:00 PM, returns the
-// timestamp of today's 3:00 PM; otherwise null (not in the Jumuah window).
+// If `now` is a Friday (Bangladesh time) between 10:00 AM and 3:00 PM,
+// returns the timestamp of today's 3:00 PM; otherwise null (not Jumuah).
+// Earlier hours (e.g. a late-night Waz running past midnight into Friday)
+// are NOT Jumuah — they record as normal parts.
 function jumuahDeadlineMs(now) {
   const p = dhakaParts(now);
-  if (p.weekday !== 'Fri') return null;
+  if (p.weekday !== 'Fri' || p.hour < JUMUAH_START_HOUR) return null;
   const deadline = Date.UTC(p.year, p.month - 1, p.day, JUMUAH_END_HOUR - 6, 0, 0); // Dhaka = UTC+6
   return now.getTime() < deadline ? deadline : null;
 }
