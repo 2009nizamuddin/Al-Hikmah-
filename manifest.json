@@ -969,5 +969,21 @@
     "part": 1,
     "recordedAt": "2026-11-11T18:55:01.563Z",
     "endedAt": "2026-11-11T20:43:06.674Z"
+  },
+  {
+    "iso": "2026-11-13",
+    "english": "13 November 2026",
+    "hijri": "٢ جمادى الآخرة ١٤٤٨ هـ",
+    "bengali": "২৯ কার্তিক ১৪৩৩ বঙ্গাব্দ",
+    "kind": "jumuah",
+    "title": "জুমুয়াবারের আলোচনা",
+    "startTime": "12:54",
+    "endTime": "14:56",
+    "tag": "rec-2026-11-13",
+    "assetUrl": "https://github.com/2009nizamuddin/Al-Hikmah-/releases/download/rec-2026-11-13/rec-2026-11-13.mp3",
+    "sizeBytes": 37590440,
+    "part": 1,
+    "recordedAt": "2026-11-13T06:54:42.360Z",
+    "endedAt": "2026-11-13T08:56:48.033Z"
   }
 ]
