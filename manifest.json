@@ -1177,5 +1177,21 @@
     "part": 2,
     "recordedAt": "2026-11-20T11:15:34.795Z",
     "endedAt": "2026-11-20T13:15:31.970Z"
+  },
+  {
+    "iso": "2026-11-20",
+    "english": "20 November 2026",
+    "hijri": "٩ جمادى الآخرة ١٤٤٨ هـ",
+    "bengali": "৬ অগ্রহায়ণ ১৪৩৩ বঙ্গাব্দ",
+    "kind": "regular",
+    "title": "",
+    "startTime": "19:15",
+    "endTime": "21:00",
+    "tag": "rec-2026-11-20-part3",
+    "assetUrl": "https://github.com/2009nizamuddin/Al-Hikmah-/releases/download/rec-2026-11-20-part3/rec-2026-11-20-part3.mp3",
+    "sizeBytes": 31711263,
+    "part": 3,
+    "recordedAt": "2026-11-20T13:15:38.792Z",
+    "endedAt": "2026-11-20T15:00:24.387Z"
   }
 ]
