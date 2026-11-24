@@ -125,6 +125,48 @@
   .foot { text-align: center; font-size: .7rem; color: var(--muted); line-height: 1.8; margin-top: 20px; }
   .foot a { color: var(--blue); }
 
+
+  /* ---------- live timeline (hidden until its icon button is pressed) ---------- */
+  .btns { display: flex; gap: 8px; flex: none; }
+  .ib { width: 38px; height: 34px; display: grid; place-items: center; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 0; }
+  .ib svg { width: 19px; height: 19px; } .ib.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .tl { display: none; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .tl.on { display: block; }
+  .tlhead { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; min-height: 22px; gap: 8px; }
+  .behind { font-weight: 700; color: var(--blue-d); }
+  @media (prefers-color-scheme: dark) { .behind { color: #cfdcff; } }
+  .behind.live { color: var(--red); display: flex; align-items: center; gap: 6px; } .behind.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: bl 1.3s infinite; }
+  .tl .tnote { font-size: .68rem; color: var(--muted); text-align: right; }
+  input[type=range].line { -webkit-appearance: none; appearance: none; width: 100%; height: 32px; background: transparent; margin: 0; --pct: 100%; }
+  input.line::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(to right, var(--blue) var(--pct), var(--tint) var(--pct)); }
+  input.line::-moz-range-track { height: 6px; border-radius: 3px; background: var(--tint); } input.line::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--blue); }
+  input.line::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); border: 3px solid var(--card); box-shadow: 0 0 0 1.5px var(--blue); margin-top: -9px; }
+  input.line::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--blue); border: 3px solid var(--card); }
+  .tends { display: flex; justify-content: space-between; font-size: .7rem; color: var(--muted); margin-top: -3px; font-variant-numeric: tabular-nums; }
+  .tend-live { color: var(--red); font-weight: 700; }
+  .tctl { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; margin-top: 10px; }
+  .sk { justify-self: start; display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 7px 11px; font-size: .78rem; font-weight: 600; }
+  .sk.r { justify-self: end; } .sk svg { width: 17px; height: 17px; }
+  .golive { border: 0; background: var(--tint); color: var(--blue-d); border-radius: 999px; padding: 8px 16px; font-size: .8rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .golive i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .golive.on { background: var(--red); color: #fff; } .golive.on i { background: #fff; }
+  @media (prefers-color-scheme: dark) { .golive { color: #cfdcff; } .golive.on { color: #fff; } }
+
+  /* ---------- docked recording player ---------- */
+  .app { position: relative; }
+  .dock { position: absolute; left: 0; right: 0; bottom: 64px; background: var(--card); border-top: 1px solid var(--line); border-radius: 20px 20px 0 0; padding: 12px 18px; box-shadow: 0 -8px 24px rgba(15,27,51,.10); transform: translateY(140%); transition: transform .3s ease; z-index: 5; }
+  .dock.on { transform: none; }
+  .dtop { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .dtop b { font-size: .88rem; font-weight: 600; line-height: 1.45; min-width: 0; } .dtop small { display: block; color: var(--muted); font-weight: 400; font-size: .72rem; }
+  .x { width: 30px; height: 30px; border: 0; background: var(--tint); color: var(--blue-d); border-radius: 50%; flex: none; font-size: .9rem; }
+  .dctl { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 8px; position: relative; }
+  .skb { border: 0; background: none; color: var(--ink); display: flex; flex-direction: column; align-items: center; font-size: .66rem; font-weight: 600; gap: 1px; } .skb svg { width: 26px; height: 26px; }
+  .bigp { width: 54px; height: 54px; border-radius: 50%; border: 0; background: var(--blue); color: #fff; display: grid; place-items: center; } .bigp svg { width: 22px; height: 22px; }
+  .spd { position: absolute; right: 0; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 5px 10px; font-size: .78rem; font-weight: 700; }
+  .page.pad { padding-bottom: 200px; }
+  .rec.now { border-color: var(--blue); }
+  .rec .p.on { background: var(--blue); color: #fff; }
+
   /* ---------- bottom tabs ---------- */
   .tabs { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--card); border-top: 1px solid var(--line); padding: 6px 8px calc(8px + env(safe-area-inset-bottom,0px)); }
   .tabs button { background: none; border: 0; color: var(--muted); font-size: .72rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; }
@@ -168,7 +210,20 @@
         </div>
         <div class="srow">
           <div class="sinfo"><b id="sTitle">যাচাই হচ্ছে...</b><small><span class="sig"><s></s><s></s><s></s><s></s></span><span id="sSub">al-hikmah.net</span></small></div>
-          <button class="rf" id="rf" aria-label="রিফ্রেশ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>রিফ্রেশ</button>
+          <div class="btns">
+            <button class="ib" id="tlb" aria-label="সময়ের লাইন (আগে-পরে টানুন)" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><circle cx="9" cy="12" r="2.6" fill="currentColor"/><path d="M3 7v10M21 7v10"/></svg></button>
+            <button class="rf" id="rf" aria-label="রিফ্রেশ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>রিফ্রেশ</button>
+          </div>
+        </div>
+        <div class="tl" id="tl">
+          <div class="tlhead"><span class="behind live" id="bh"><i></i>সরাসরি</span><span class="tnote" id="tnote"></span></div>
+          <input class="line" id="sl" type="range" min="0" max="1" step="0.1" value="1" aria-label="আগে-পরে টানুন">
+          <div class="tends"><span id="tstart">−০:০০</span><span class="tend-live">LIVE</span></div>
+          <div class="tctl">
+            <button class="sk" id="bk" aria-label="১৫ সেকেন্ড পেছনে"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v4h4"/></svg>১৫ সে.</button>
+            <button class="golive on" id="gl"><i></i>LIVE</button>
+            <button class="sk r" id="fw" aria-label="১৫ সেকেন্ড সামনে">১৫ সে.<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4h-4"/></svg></button>
+          </div>
         </div>
         <div class="vrow">
           <button class="mute" id="muteBtn" aria-label="মিউট"><svg id="volIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"></svg></button>
@@ -204,6 +259,17 @@
     </section>
 
   </main>
+
+  <div class="dock" id="dock">
+    <div class="dtop"><b id="dt">—</b><button class="x" id="xb" aria-label="বন্ধ করুন">✕</button></div>
+    <div style="margin-top:10px"><input class="line" id="rs" type="range" min="0" max="1000" value="0" aria-label="রেকর্ডিংয়ের অবস্থান" style="--pct:0%"><div class="tends"><span id="t1">০:০০</span><span id="t2">−০:০০</span></div></div>
+    <div class="dctl">
+      <button class="skb" id="rbk" aria-label="১৫ সেকেন্ড পেছনে"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v4h4"/></svg>১৫ সে.</button>
+      <button class="bigp" id="rpp" aria-label="চালান"><svg id="rpi" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+      <button class="skb" id="rfw" aria-label="১৫ সেকেন্ড সামনে"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4h-4"/></svg>১৫ সে.</button>
+      <button class="spd" id="sp" aria-label="গতি">১x</button>
+    </div>
+  </div>
 
   <nav class="tabs" id="tabs">
     <button class="on" data-v="live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M7.7 7.7a6 6 0 0 0 0 8.6M16.3 7.7a6 6 0 0 1 0 8.6M4.9 4.9a10 10 0 0 0 0 14.2M19.1 4.9a10 10 0 0 1 0 14.2"/></svg>লাইভ</button>
@@ -290,41 +356,30 @@ drawDateBar();
    ============================================================ */
 const STATUS_API_URL = '/api/live-status';
 const POLL_INTERVAL_MS = 60000;
-const statusEl = document.getElementById('status');
-const statusText = document.getElementById('statusText');
-const playerEl = document.getElementById('player');
-const sTitle = document.getElementById('sTitle');
-const sSub = document.getElementById('sSub');
-const rf = document.getElementById('rf');
-document.getElementById('wave').innerHTML = [4,7,5,9,6,11,8,5,12,9,6,13,10,7,15,11,8,6,12,9,14,10,7,5,11,8,13,9,6,10,7,12,8,5,9,6].map((h) => `<i style="height:${h * 6}%"></i>`).join('');
+const $ = (id) => document.getElementById(id);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const statusEl = $('status'), statusText = $('statusText'), playerEl = $('player');
+const sTitle = $('sTitle'), sSub = $('sSub'), rf = $('rf');
+$('wave').innerHTML = [4,7,5,9,6,11,8,5,12,9,6,13,10,7,15,11,8,6,12,9,14,10,7,5,11,8,13,9,6,10,7,12,8,5,9,6].map((h) => `<i style="height:${h * 6}%"></i>`).join('');
 
 const audio = new Audio();
 audio.preload = 'none';
-let isPlaying = false;
-let connectingText = '';
-let baseSub = 'al-hikmah.net';
+let isPlaying = false, connectingText = '', baseSub = 'al-hikmah.net', liveUrl = null, mode = null; // mode: null | 'dvr' | 'direct'
+let liveState = 'checking';
 
 function setStatus(state) {
+  liveState = state;
   statusEl.className = 'status' + (state === 'live' ? ' live' : '');
   playerEl.classList.toggle('live', state === 'live');
   statusText.textContent = state === 'live' ? 'LIVE' : state === 'offline' ? 'অফলাইন' : 'যাচাই হচ্ছে';
   sTitle.textContent = state === 'live' ? 'লাইভ চলছে' : state === 'offline' ? 'এখন লাইভ নেই' : 'যাচাই হচ্ছে...';
+  updateTimeline();
 }
 function renderSub() { sSub.textContent = connectingText || baseSub; }
 
 audio.addEventListener('waiting', () => { connectingText = 'সংযোগ হচ্ছে...'; renderSub(); });
 audio.addEventListener('playing', () => { connectingText = ''; renderSub(); });
 audio.addEventListener('pause', () => { connectingText = ''; renderSub(); });
-
-function showAudioSource(url, kbps) {
-  if (audio.src !== url) {
-    const wasPlaying = isPlaying;
-    audio.src = url;
-    if (wasPlaying) audio.play().catch(() => {});
-  }
-  baseSub = kbps ? `al-hikmah.net · ${bn(kbps)} kbps` : 'al-hikmah.net';
-  renderSub();
-}
 
 async function checkLiveStatus() {
   let data;
@@ -337,38 +392,183 @@ async function checkLiveStatus() {
     return;
   }
   if (data && data.live && data.streamUrl) {
+    liveUrl = data.streamUrl;
     setStatus('live');
-    showAudioSource(data.streamUrl, data.bitrateKbps);
+    baseSub = data.bitrateKbps ? `al-hikmah.net · ${bn(data.bitrateKbps)} kbps` : 'al-hikmah.net';
   } else {
     setStatus('offline');
-    baseSub = 'লাইভ শুরু হলে এখানেই শুনতে পারবেন'; renderSub();
+    baseSub = 'লাইভ শুরু হলে এখানেই শুনতে পারবেন';
   }
+  renderSub();
 }
 checkLiveStatus();
 setInterval(checkLiveStatus, POLL_INTERVAL_MS);
 
-/* Refresh: re-check the live status now (and the archive, if it is open). */
-rf.addEventListener('click', async () => {
+/* Refresh: reload the WHOLE page from scratch (back to the live edge). */
+rf.addEventListener('click', () => {
   rf.classList.add('spin');
-  setStatus('checking');
-  baseSub = 'al-hikmah.net'; renderSub();
-  await checkLiveStatus();
-  if (archLoaded) await loadArchive();
-  drawDateBar();
-  setTimeout(() => rf.classList.remove('spin'), 400);
+  setTimeout(() => location.reload(), 150);
+});
+
+/* ============================================================
+   Live timeline (DVR) — the page keeps its own copy of the audio it
+   has received since Play was pressed, so you can go back and forth.
+   Uses MediaSource. If the browser/stream server doesn't allow it,
+   we fall back to plain live playback (no timeline).
+   ============================================================ */
+const DVR_MAX_SECONDS = 3600; // keep at most the last 60 minutes
+const dvr = {
+  ms: null, sb: null, ctrl: null, queue: [], active: false, ended: false, url: null,
+  supported() { return 'MediaSource' in window && MediaSource.isTypeSupported('audio/mpeg'); },
+  async start(url) {
+    this.stop();
+    this.url = url;
+    return new Promise((resolve) => {
+      let settled = false;
+      const done = (v) => { if (!settled) { settled = true; clearTimeout(timer); if (!v) this.stop(); resolve(v); } };
+      const timer = setTimeout(() => done(false), 12000);
+      (async () => {
+        try {
+          const ms = new MediaSource();
+          this.ms = ms;
+          audio.src = URL.createObjectURL(ms);
+          await new Promise((r) => ms.addEventListener('sourceopen', r, { once: true }));
+          const sb = ms.addSourceBuffer('audio/mpeg');
+          sb.mode = 'sequence';
+          sb.addEventListener('updateend', () => { this.trim(); this.pump(); });
+          this.sb = sb;
+          const ctrl = new AbortController();
+          this.ctrl = ctrl;
+          const res = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
+          if (!res.ok || !res.body) throw new Error('stream not readable');
+          const reader = res.body.getReader();
+          this.active = true; this.ended = false;
+          (async () => {
+            try {
+              for (;;) {
+                const { value, done: fin } = await reader.read();
+                if (fin) break;
+                this.queue.push(value);
+                this.pump();
+                done(true);
+                while (this.queue.length > 60 && !ctrl.signal.aborted) await sleep(100);
+              }
+            } catch (e) { /* aborted or dropped */ }
+            this.ended = true; this.active = false;
+            try { if (this.ms && this.ms.readyState === 'open' && !(this.sb && this.sb.updating)) this.ms.endOfStream(); } catch (e) {}
+            updateTimeline();
+          })();
+        } catch (e) { done(false); }
+      })();
+    });
+  },
+  pump() {
+    const sb = this.sb;
+    if (!sb || sb.updating || !this.queue.length || !this.ms || this.ms.readyState !== 'open') return;
+    const chunk = this.queue.shift();
+    try { sb.appendBuffer(chunk); }
+    catch (e) { this.queue.unshift(chunk); this.trim(true); }
+  },
+  range() {
+    const sb = this.sb;
+    if (!sb) return null;
+    try { const b = sb.buffered; return b.length ? { start: b.start(0), end: b.end(b.length - 1) } : null; } catch (e) { return null; }
+  },
+  trim(force) {
+    const sb = this.sb, r = this.range();
+    if (!sb || sb.updating || !r) return;
+    const keepFrom = r.end - DVR_MAX_SECONDS;
+    const cut = Math.min(keepFrom, audio.currentTime - 10);
+    if (cut > r.start + 5 || (force && audio.currentTime - 10 > r.start + 1)) {
+      try { sb.remove(r.start, force ? Math.max(cut, audio.currentTime - 10) : cut); } catch (e) {}
+    } else if (r.end - r.start > DVR_MAX_SECONDS && audio.paused && this.ctrl && !this.ctrl.signal.aborted) {
+      this.ctrl.abort(); // buffer is full while paused: stop downloading more
+    }
+  },
+  stop() {
+    try { if (this.ctrl) this.ctrl.abort(); } catch (e) {}
+    this.queue = []; this.active = false; this.ctrl = null; this.sb = null; this.ms = null;
+  }
+};
+
+async function startLive() {
+  if (!liveUrl) { await checkLiveStatus(); }
+  if (!liveUrl) { setStatus('offline'); return; }
+  connectingText = 'সংযোগ হচ্ছে...'; renderSub();
+  if (dvr.supported() && await dvr.start(liveUrl)) {
+    mode = 'dvr';
+    audio.play().catch(() => {});
+    updateTimeline();
+    return;
+  }
+  mode = 'direct';
+  audio.src = liveUrl;
+  if (boostOn) audio.addEventListener('error', () => revertBoost('⚠️ এই সম্প্রচার সার্ভার ভলিউম বুস্ট সমর্থন করে না, তাই স্বাভাবিক ভলিউমে ফিরিয়ে দেওয়া হলো।'), { once: true });
+  audio.play().catch(() => { setStatus('offline'); baseSub = 'চালু করা যায়নি — রিফ্রেশ চাপুন'; renderSub(); });
+  updateTimeline();
+}
+
+/* timeline UI */
+const tl = $('tl'), tlb = $('tlb'), sl = $('sl'), bh = $('bh'), gl = $('gl'), tnote = $('tnote');
+let tlDrag = false;
+function clock(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return bn(h ? `${h}:${String(m).padStart(2, '0')}` : m) + ':' + bn(String(s).padStart(2, '0'));
+}
+function updateTimeline() {
+  if (!tl.classList.contains('on')) return;
+  const r = mode === 'dvr' ? dvr.range() : null;
+  if (!r) {
+    sl.disabled = true; sl.max = '1'; sl.value = '1'; sl.style.setProperty('--pct', '100%');
+    $('tstart').textContent = '−০:০০';
+    bh.className = 'behind live'; bh.innerHTML = '<i></i>সরাসরি';
+    gl.classList.add('on');
+    tnote.textContent = mode === 'direct' ? 'এই ডিভাইস বা সার্ভারে আগে-পরে টানা সম্ভব নয়' : 'প্লে চাপলে লাইন কাজ করবে';
+    return;
+  }
+  sl.disabled = false;
+  const len = Math.max(1, r.end - r.start);
+  const behind = Math.max(0, r.end - audio.currentTime);
+  sl.max = String(len);
+  if (!tlDrag) sl.value = String(Math.max(0, audio.currentTime - r.start));
+  sl.style.setProperty('--pct', (Math.max(0, audio.currentTime - r.start) / len * 100) + '%');
+  $('tstart').textContent = '−' + clock(len);
+  const atLive = behind < 3 && !dvr.ended;
+  bh.className = 'behind' + (atLive ? ' live' : '');
+  bh.innerHTML = atLive ? '<i></i>সরাসরি' : `${clock(behind)} পেছনে`;
+  gl.classList.toggle('on', atLive);
+  tnote.textContent = dvr.ended ? 'সংযোগ বিচ্ছিন্ন — LIVE বা রিফ্রেশ চাপুন' : 'যতক্ষণ শুনেছেন ততটুকু পর্যন্ত';
+}
+setInterval(updateTimeline, 500);
+tlb.addEventListener('click', () => {
+  const on = tl.classList.toggle('on');
+  tlb.classList.toggle('on', on);
+  tlb.setAttribute('aria-pressed', String(on));
+  updateTimeline();
+});
+function seekTo(t) {
+  const r = dvr.range();
+  if (!r) return;
+  audio.currentTime = Math.min(Math.max(t, r.start + 0.2), r.end - 0.3);
+}
+let tlDragT = null;
+sl.addEventListener('input', () => { tlDrag = true; clearTimeout(tlDragT); tlDragT = setTimeout(() => { tlDrag = false; }, 1200); const r = dvr.range(); if (r) seekTo(r.start + Number(sl.value)); updateTimeline(); });
+sl.addEventListener('change', () => { tlDrag = false; });
+['pointerup', 'pointercancel', 'touchend', 'mouseup'].forEach((ev) => sl.addEventListener(ev, () => { tlDrag = false; }));
+$('bk').addEventListener('click', () => { if (mode === 'dvr') seekTo(audio.currentTime - 15); });
+$('fw').addEventListener('click', () => { if (mode === 'dvr') seekTo(audio.currentTime + 15); });
+gl.addEventListener('click', async () => {
+  if (mode === 'dvr' && dvr.active) { const r = dvr.range(); if (r) seekTo(r.end); audio.play().catch(() => {}); }
+  else { await startLive(); }
+  updateTimeline();
 });
 
 /* ============================================================
    Audio controls
    ============================================================ */
-const playBtn = document.getElementById('bp');
-const playIcon = document.getElementById('pi');
-const muteBtn = document.getElementById('muteBtn');
-const volIcon = document.getElementById('volIcon');
-const volumeSlider = document.getElementById('volumeSlider');
-const volPct = document.getElementById('volPct');
-const boostToggle = document.getElementById('boostToggle');
-const volumeWarning = document.getElementById('volumeWarning');
+const playBtn = $('bp'), playIcon = $('pi'), muteBtn = $('muteBtn'), volIcon = $('volIcon');
+const volumeSlider = $('volumeSlider'), volPct = $('volPct'), boostToggle = $('boostToggle'), volumeWarning = $('volumeWarning');
 
 const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
 const ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
@@ -377,16 +577,17 @@ const ICON_MUTE = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.0
 volIcon.innerHTML = ICON_VOL;
 let isMuted = false;
 
-playBtn.addEventListener('click', () => {
-  if (isPlaying) audio.pause();
-  else audio.play().catch(() => { setStatus('offline'); baseSub = 'চালু করা যায়নি — রিফ্রেশ চাপুন'; renderSub(); });
+playBtn.addEventListener('click', async () => {
+  if (isPlaying) { audio.pause(); return; }
+  if (mode === null || (mode === 'dvr' && !dvr.active && dvr.ended)) { await startLive(); return; }
+  audio.play().catch(() => {});
 });
 audio.addEventListener('play', () => {
   isPlaying = true;
   playerEl.classList.add('playing');
   playIcon.innerHTML = ICON_PAUSE;
   playBtn.setAttribute('aria-label', 'থামান');
-  stopArchive();
+  if (typeof stopArchive === 'function') stopArchive();
 });
 audio.addEventListener('pause', () => {
   isPlaying = false;
@@ -401,10 +602,10 @@ muteBtn.addEventListener('click', () => {
 });
 
 /* ---- Unlimited volume boost (Web Audio API) ----
-   A plain <audio> element caps volume at 100% (native browser limit).
-   To go louder, audio is routed through a GainNode. This only works if
-   the streaming server sends permissive CORS headers; otherwise we fall
-   back to normal playback and say why. */
+   A plain <audio> element caps volume at 100% (native browser limit),
+   so audio goes through a GainNode. In timeline (MediaSource) mode the
+   audio is already same-origin so this just works; in plain streaming
+   mode it needs permissive CORS headers from the stream server. */
 const BOOST_MAX_PERCENT = 400;
 const BOOST_WARN_PERCENT = 150;
 const BOOST_WARNING_TEXT = '⚠️ বেশি বুস্ট করলে শব্দ বিকৃত (distort) হতে পারে এবং দীর্ঘক্ষণ শুনলে স্পিকার বা কানের ক্ষতি হতে পারে। সতর্কতার সাথে বাড়ান, শব্দ কর্কশ শোনালে কমিয়ে দিন।';
@@ -435,9 +636,11 @@ function revertBoost(message) {
   if (volPercent() > 100) volumeSlider.value = '100';
   boostToggle.classList.remove('on');
   boostToggle.setAttribute('aria-pressed', 'false');
-  audio.crossOrigin = null;
-  const was = isPlaying, src = audio.src;
-  if (src) { audio.src = ''; audio.src = src; if (was) audio.play().catch(() => {}); }
+  if (mode === 'direct') {
+    audio.crossOrigin = null;
+    const was = isPlaying, src = audio.src;
+    if (src) { audio.src = ''; audio.src = src; if (was) audio.play().catch(() => {}); }
+  }
   if (message) { volumeWarning.textContent = message; volumeWarning.classList.add('show'); }
   applyVolume();
 }
@@ -449,18 +652,20 @@ boostToggle.addEventListener('click', () => {
       return;
     }
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    const was = isPlaying, src = audio.src;
-    audio.crossOrigin = 'anonymous';
-    if (src) { audio.src = ''; audio.src = src; }
-    clearTimeout(boostFallbackTimer);
-    const onError = () => {
+    if (mode === 'direct') {
+      const was = isPlaying, src = audio.src;
+      audio.crossOrigin = 'anonymous';
+      if (src) { audio.src = ''; audio.src = src; }
       clearTimeout(boostFallbackTimer);
-      audio.removeEventListener('error', onError);
-      revertBoost('⚠️ এই সম্প্রচার সার্ভার ভলিউম বুস্ট সমর্থন করে না, তাই স্বাভাবিক ভলিউমে ফিরিয়ে দেওয়া হলো।');
-    };
-    audio.addEventListener('error', onError, { once: true });
-    boostFallbackTimer = setTimeout(() => audio.removeEventListener('error', onError), 4000);
-    if (was || src) audio.play().catch(onError);
+      const onError = () => {
+        clearTimeout(boostFallbackTimer);
+        audio.removeEventListener('error', onError);
+        revertBoost('⚠️ এই সম্প্রচার সার্ভার ভলিউম বুস্ট সমর্থন করে না, তাই স্বাভাবিক ভলিউমে ফিরিয়ে দেওয়া হলো।');
+      };
+      audio.addEventListener('error', onError, { once: true });
+      boostFallbackTimer = setTimeout(() => audio.removeEventListener('error', onError), 4000);
+      if (was || src) audio.play().catch(onError);
+    }
     boostOn = true;
     volumeSlider.max = String(BOOST_MAX_PERCENT);
     volumeWarning.textContent = BOOST_WARNING_TEXT;
@@ -520,11 +725,8 @@ function sizeText(bytes) {
   return mb >= 1 ? `${bn(mb.toFixed(1))} MB` : `${bn(Math.round(bytes / 1024))} KB`;
 }
 function esc(str) { const div = document.createElement('div'); div.textContent = str == null ? '' : String(str); return div.innerHTML; }
-function clock(sec) { if (!isFinite(sec)) return '০:০০'; const m = Math.floor(sec / 60), s = Math.floor(sec % 60); return `${bn(m)}:${bn(String(s).padStart(2, '0'))}`; }
 
-const calEl = document.getElementById('cal');
-const dayEl = document.getElementById('day');
-const monthTitle = document.getElementById('mt');
+const calEl = $('cal'), dayEl = $('day'), monthTitle = $('mt');
 let byDay = {};
 const nowIso = todayIsoDhaka();
 let calY = +nowIso.slice(0, 4), calM = +nowIso.slice(5, 7) - 1, selDay = null;
@@ -532,21 +734,65 @@ const keyOf = (d) => `${calY}-${String(calM + 1).padStart(2, '0')}-${String(d).p
 const TRI = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 const PAU = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
 
-/* one shared player for all archive recordings */
+/* ---- docked recording player: draggable line, ±15s, speed ---- */
 const arch = new Audio();
 arch.preload = 'none';
-let archBtn = null, archRow = null;
-function stopArchive() {
-  arch.pause();
+const dock = $('dock'), rs = $('rs'), tabsEl = $('tabs');
+let curRec = null, rsDrag = false, speed = 1;
+function placeDock() { dock.style.bottom = tabsEl.offsetHeight + 'px'; }
+placeDock(); window.addEventListener('resize', placeDock);
+function stopArchive() { arch.pause(); }
+
+function syncDock() {
+  const dur = arch.duration;
+  const has = isFinite(dur) && dur > 0;
+  if (!rsDrag) rs.value = has ? String(arch.currentTime / dur * 1000) : '0';
+  rs.style.setProperty('--pct', (has ? arch.currentTime / dur * 100 : 0) + '%');
+  $('t1').textContent = clock(arch.currentTime);
+  $('t2').textContent = has ? '−' + clock(dur - arch.currentTime) : '−০:০০';
+  $('rpi').innerHTML = arch.paused ? ICON_PLAY : ICON_PAUSE;
+  document.querySelectorAll('#day .rec').forEach((row) => {
+    const mine = curRec && row.dataset.url === curRec.assetUrl;
+    row.classList.toggle('now', !!mine);
+    const b = row.querySelector('.p'); b.classList.toggle('on', !!mine);
+    b.innerHTML = mine && !arch.paused ? PAU : TRI;
+  });
 }
-arch.addEventListener('play', () => { audio.pause(); if (archBtn) { archBtn.classList.add('on'); archBtn.innerHTML = PAU; } });
-arch.addEventListener('pause', () => { if (archBtn) { archBtn.classList.remove('on'); archBtn.innerHTML = TRI; } });
-arch.addEventListener('timeupdate', () => {
-  if (!archRow) return;
-  const bar = archRow.querySelector('.pgb i'), t = archRow.querySelector('.pgt');
-  if (arch.duration) bar.style.width = (arch.currentTime / arch.duration * 100) + '%';
-  t.textContent = `${clock(arch.currentTime)} / ${clock(arch.duration)}`;
+['timeupdate', 'durationchange', 'play', 'pause', 'ended', 'loadedmetadata'].forEach((ev) => arch.addEventListener(ev, syncDock));
+arch.addEventListener('play', () => { audio.pause(); });
+
+function openRec(rec) {
+  if (curRec && curRec.assetUrl === rec.assetUrl) { arch.paused ? arch.play().catch(() => {}) : arch.pause(); return; }
+  curRec = rec;
+  arch.src = rec.assetUrl;
+  arch.playbackRate = speed;
+  const label = rec.title || (rec.kind === 'jumuah' ? 'জুমুয়াবারের আলোচনা' : '');
+  const range = timeRangeBn(startOf(rec), endOf(rec));
+  $('dt').innerHTML = `${label ? `<span class="bd">${esc(label)}</span>` : ''}${esc(rec.english || rec.iso)}<small>${range}</small>`;
+  dock.classList.add('on');
+  $('p-arch').classList.add('pad');
+  arch.play().catch(() => {});
+}
+function closeDock() {
+  arch.pause(); arch.removeAttribute('src'); arch.load();
+  curRec = null;
+  dock.classList.remove('on');
+  $('p-arch').classList.remove('pad');
+  syncDock();
+}
+$('xb').addEventListener('click', closeDock);
+$('rpp').addEventListener('click', () => { if (curRec) (arch.paused ? arch.play().catch(() => {}) : arch.pause()); });
+$('rbk').addEventListener('click', () => { if (curRec) arch.currentTime = Math.max(0, arch.currentTime - 15); });
+$('rfw').addEventListener('click', () => { if (curRec && isFinite(arch.duration)) arch.currentTime = Math.min(arch.duration, arch.currentTime + 15); });
+$('sp').addEventListener('click', function () {
+  speed = speed === 1 ? 1.5 : speed === 1.5 ? 2 : 1;
+  arch.playbackRate = speed;
+  this.textContent = bn(speed) + 'x';
 });
+let rsDragT = null;
+rs.addEventListener('input', () => { rsDrag = true; clearTimeout(rsDragT); rsDragT = setTimeout(() => { rsDrag = false; }, 1200); if (isFinite(arch.duration)) arch.currentTime = rs.value / 1000 * arch.duration; syncDock(); });
+rs.addEventListener('change', () => { rsDrag = false; });
+['pointerup', 'pointercancel', 'touchend', 'mouseup'].forEach((ev) => rs.addEventListener(ev, () => { rsDrag = false; }));
 
 function drawCal() {
   monthTitle.textContent = `${MONTHS_BN[calM]} ${bn(calY)}`;
@@ -566,7 +812,6 @@ function drawDay() {
   if (!selDay) { dayEl.innerHTML = ''; return; }
   const [y, m, d] = selDay.split('-').map(Number);
   const list = (byDay[selDay] || []).slice().sort((a, b) => (startOf(a) || '').localeCompare(startOf(b) || ''));
-  archBtn = null; archRow = null; arch.pause();
   let html = `<div class="dhead"><div class="dh">${bn(d)} ${MONTHS_BN[m - 1]} ${bn(y)} · ${weekdayBn(selDay)}</div></div>`;
   if (!list.length) {
     html += '<p class="note">এই দিনে কোনো রেকর্ডিং নেই। নীল বিন্দুওয়ালা তারিখে রেকর্ডিং আছে।</p>';
@@ -576,7 +821,7 @@ function drawDay() {
       const part = list.length > 1 ? `পর্ব ${bn(i + 1)}` : '';
       const range = timeRangeBn(startOf(rec), endOf(rec));
       const dates = [rec.hijri, rec.bengali].filter(Boolean).join(' · ');
-      return `<div class="rec" data-i="${i}">
+      return `<div class="rec" data-i="${i}" data-url="${esc(rec.assetUrl)}">
         <div class="rtop">
           <button class="p" aria-label="চালান">${TRI}</button>
           <div class="t"><b>${part ? `<span class="bd">${part}</span>` : ''}${label ? `<span class="bd">${esc(label)}</span>` : ''}${esc(rec.english || rec.iso)}</b>
@@ -584,31 +829,18 @@ function drawDay() {
             ${dates ? `<small>${esc(dates)}</small>` : ''}</div>
           <a class="dl" href="${esc(rec.assetUrl)}" download>ডাউনলোড</a>
         </div>
-        <div class="pgw"><span class="pgt">০:০০ / ০:০০</span><div class="pgb"><i></i></div></div>
       </div>`;
     }).join('');
   }
   dayEl.innerHTML = html;
   dayEl.querySelectorAll('.rec').forEach((row) => {
-    const rec = list[+row.dataset.i];
-    const btn = row.querySelector('.p');
-    btn.addEventListener('click', () => {
-      if (archRow === row) { arch.paused ? arch.play().catch(() => {}) : arch.pause(); return; }
-      if (archRow) { archRow.classList.remove('act'); archBtn.classList.remove('on'); archBtn.innerHTML = TRI; }
-      archRow = row; archBtn = btn; row.classList.add('act');
-      arch.src = rec.assetUrl;
-      arch.play().catch(() => {});
-    });
-    row.querySelector('.pgb').addEventListener('click', (e) => {
-      if (archRow !== row || !arch.duration) return;
-      const r = e.currentTarget.getBoundingClientRect();
-      arch.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * arch.duration;
-    });
+    row.querySelector('.p').addEventListener('click', () => openRec(list[+row.dataset.i]));
   });
+  syncDock();
 }
 
-document.getElementById('pm').addEventListener('click', () => { calM--; if (calM < 0) { calM = 11; calY--; } drawCal(); });
-document.getElementById('nm').addEventListener('click', () => { calM++; if (calM > 11) { calM = 0; calY++; } drawCal(); });
+$('pm').addEventListener('click', () => { calM--; if (calM < 0) { calM = 11; calY--; } drawCal(); });
+$('nm').addEventListener('click', () => { calM++; if (calM > 11) { calM = 0; calY++; } drawCal(); });
 
 async function loadArchive() {
   let manifest;
@@ -617,7 +849,7 @@ async function loadArchive() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     manifest = await res.json();
   } catch (e) {
-    dayEl.innerHTML = '<p class="note">আর্কাইভ এই মুহূর্তে লোড করা যাচ্ছে না। একটু পর আবার চেষ্টা করুন (উপরে রিফ্রেশ চাপুন)।</p>';
+    dayEl.innerHTML = '<p class="note">আর্কাইভ এই মুহূর্তে লোড করা যাচ্ছে না। একটু পর আবার চেষ্টা করুন (উপরে রিফ্রেশ বা পাতা নতুন করে খুলুন)।</p>';
     archLoaded = false;
     return;
   }
