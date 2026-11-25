@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>আল হিকমাহ লাইভ</title>
 <meta name="description" content="রাজারবাগ শরীফ (আল হিকমাহ) থেকে সরাসরি ওয়াজ শরীফ শুনুন, এবং আগের রেকর্ডিং আর্কাইভ থেকে শুনুন।">
+<meta name="theme-color" content="#1747c6">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="আল হিকমাহ">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -867,6 +876,11 @@ async function loadArchive() {
 /* arrive via archive.html / #arch / #sites */
 const startHash = location.hash.slice(1);
 if (TAB_IDS.includes(startHash) && startHash !== 'live') showTab(startHash);
+
+/* register the (tiny) service worker so Chrome can install the site as an app */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
+}
 </script>
 </body>
 </html>
