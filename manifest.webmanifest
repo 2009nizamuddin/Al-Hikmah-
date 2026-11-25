@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "আল হিকমাহ লাইভ",
+  "short_name": "আল হিকমাহ",
+  "description": "রাজারবাগ শরীফ (আল হিকমাহ) থেকে সরাসরি ওয়াজ শরীফ শুনুন এবং আগের রেকর্ডিং আর্কাইভ থেকে শুনুন।",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f6fb",
+  "theme_color": "#1747c6",
+  "categories": ["religion", "education"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "লাইভ শুনুন", "short_name": "লাইভ", "url": "/?source=shortcut", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "রেকর্ডিং আর্কাইভ", "short_name": "আর্কাইভ", "url": "/#arch", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}
