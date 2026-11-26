@@ -33,7 +33,7 @@ const { spawn, execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const STATUS_URL = process.env.STATUS_URL || 'https://nijamuddin.netlify.app/api/live-status';
+const STATUS_URL = process.env.STATUS_URL || 'https://al-hikmah-net.netlify.app/api/live-status';
 const SEGMENT_SECONDS = 2 * 60 * 60; // normal days: ~2h parts
 const JOB_SOFT_LIMIT_MS = (5 * 60 + 45) * 60 * 1000; // stop before GitHub's hard 6h job limit
 const POLL_INTERVAL_MS = 60 * 1000; // how often to re-check live-status while recording
@@ -50,10 +50,20 @@ function log(msg) {
   console.log(`[record-live] ${msg}`);
 }
 
+// Retries a few times, then returns null (instead of crashing the job) so a
+// temporary site/network hiccup just means "try again on the next run".
 async function fetchLiveStatus() {
-  const res = await fetch(STATUS_URL, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`status check failed: HTTP ${res.status}`);
-  return res.json();
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(STATUS_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      log(`status check attempt ${attempt}/3 failed (${STATUS_URL}): ${e.message}`);
+      if (attempt < 3) await sleep(10000);
+    }
+  }
+  return null;
 }
 
 /* ============================================================
