@@ -264,7 +264,11 @@
         <h3>এই ওয়েবসাইট সম্পর্কে</h3>
         <p>এটি রাজারবাগ শরীফ (আল হিকমাহ) থেকে সম্প্রচারিত লাইভ অডিও শোনার একটি সহায়ক ওয়েবসাইট। মোবাইল থেকে সহজে শোনার জন্য মূল সম্প্রচারের সাথে সরাসরি সংযুক্ত থাকে, স্পষ্ট লাইভ/অফলাইন নির্দেশক ও একটি সাধারণ প্লে বাটনসহ।</p>
       </div>
-      <div class="foot">অনানুষ্ঠানিক সহায়ক ওয়েবসাইট — সম্প্রচারকারীর সাথে সরাসরি সম্পৃক্ত নয়।<br>মূল সাইট: <a href="https://al-hikmah.net" target="_blank" rel="noopener">al-hikmah.net</a><br>© 2026 Al Hikmah Live. All rights reserved.</div>
+      <div class="about">
+        <h3>অ্যাপ হিসেবে ইনস্টল করুন</h3>
+        <p>অ্যান্ড্রয়েড: Chrome-এর উপরের ⋮ মেনু থেকে "অ্যাপ ইনস্টল করুন" অথবা "হোম স্ক্রিনে যোগ করুন" বেছে নিন।<br>আইফোন: Safari-তে নিচের শেয়ার বাটন (⬆) থেকে "হোম স্ক্রিনে যোগ করুন" বেছে নিন।</p>
+      </div>
+      <div class="foot">© ২০২৬ আল হিকমাহ লাইভ · al-hikmah-net.netlify.app<br>Design by Muhammad Nizamuddin Chowdhury</div>
     </section>
 
   </main>
@@ -878,9 +882,13 @@ const startHash = location.hash.slice(1);
 if (TAB_IDS.includes(startHash) && startHash !== 'live') showTab(startHash);
 
 /* register the (tiny) service worker so Chrome can install the site as an app */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
-}
+try {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      try { navigator.serviceWorker.register('/sw.js').catch(function () {}); } catch (e) {}
+    });
+  }
+} catch (e) {}
 </script>
 </body>
 </html>
